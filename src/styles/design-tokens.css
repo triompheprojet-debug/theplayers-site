@@ -1,0 +1,74 @@
+/* ============================================================================
+ * Design Tokens — THE PLAYERS / Liga Esport FC
+ * Source unique des variables CSS du design system.
+ *
+ * Ce fichier expose les tokens en :root pour qu'ils soient consommables
+ * partout dans l'app, y compris dans des contextes hors Tailwind
+ * (PDFs via @react-pdf/renderer, e-mails transactionnels, etc.).
+ *
+ * ⚠️ Les mêmes valeurs sont déclarées dans src/app/globals.css via @theme.
+ * Toute modification doit être répercutée DANS LES DEUX fichiers.
+ * (Tailwind v4 ne permet pas de référencer une CSS var dans @theme.)
+ * ========================================================================= */
+
+:root {
+  /* === Couleurs de fond === */
+  --color-background: #0a0a14;
+  --color-surface-1: #14141f;
+  --color-surface-2: #1f1f2e;
+  --color-surface-3: #2a2a3d;
+
+  /* === Accents === */
+  --color-accent-violet: #8b5cf6;
+  --color-accent-violet-hover: #7c3aed;
+  --color-accent-violet-dim: #6d28d9;
+  --color-success-neon: #22ff88;
+  --color-warning: #ff9933;
+  --color-danger: #ff4444;
+  --color-admin: #dc2626;
+  --color-referee: #f97316;
+
+  /* === Texte === */
+  --color-text-primary: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-text-on-accent: #0a0a14;
+
+  /* === Opérateurs Mobile Money === */
+  --color-mtn-yellow: #ffcb05;
+  --color-airtel-red: #ed1b24;
+
+  /* === Lueurs signature === */
+  --shadow-glow-violet: 0 0 24px rgb(139 92 246 / 0.4);
+  --shadow-glow-neon: 0 0 24px rgb(34 255 136 / 0.3);
+  --shadow-glow-danger: 0 0 24px rgb(255 68 68 / 0.3);
+  --shadow-ambient-violet: 0 12px 48px rgb(139 92 246 / 0.08);
+
+  /* === Rayons === */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* === Z-index (non couverts par Tailwind par défaut) === */
+  --z-dropdown: 50;
+  --z-sticky: 60;
+  --z-fixed: 70;
+  --z-modal-backdrop: 80;
+  --z-modal: 90;
+  --z-popover: 100;
+  --z-toast: 110;
+  --z-tooltip: 120;
+
+  /* === Durées d'animation === */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* === Courbes === */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
