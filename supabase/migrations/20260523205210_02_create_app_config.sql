@@ -2,7 +2,8 @@
 -- Migration 02 : Table app_config (configuration globale du site)
 -- Module : M00 - Fondations
 -- Dépend de : 01_create_enums.sql
--- Note : FK updated_by → admin_accounts sera ajoutée en M02
+-- Note : FK updated_by → admin_accounts ajoutée en M02
+-- Note : Étendue en M03 (ajout de la clé `tournament_defaults`)
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS app_config (
@@ -26,7 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_app_config_public
 ALTER TABLE app_config ENABLE ROW LEVEL SECURITY;
 
 -- ---------------------------------------------------------------------------
--- Seed initial : clés de configuration de base
+-- Seed initial (M00) : clés de configuration de base
 -- ---------------------------------------------------------------------------
 -- ON CONFLICT DO NOTHING pour rendre le seed idempotent
 
@@ -59,7 +60,7 @@ INSERT INTO app_config (key, value, is_secret, description) VALUES
     'event_location',
     '{"address":"","maps_url":"","city":"Pointe-Noire","country":"République du Congo"}'::jsonb,
     false,
-    'Lieu par défaut des événements'
+    'Lieu par défaut des événements (réutilisé comme default pour tournaments.config.location)'
   ),
   (
     'pin_max_attempts',
@@ -100,7 +101,61 @@ INSERT INTO app_config (key, value, is_secret, description) VALUES
 ON CONFLICT (key) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
+-- Extension M03 : tournament_defaults
+-- ---------------------------------------------------------------------------
+-- Defaults appliqués aux formulaires de création de tournoi (HS / Saison / GF).
+-- Structure miroir de tournaments.config (sauf 'location' qui réutilise event_location).
+-- Modifiable plus tard via une page admin Configuration (M20).
+
+INSERT INTO app_config (key, value, is_secret, description) VALUES
+  (
+    'tournament_defaults',
+    '{
+      "game": {
+        "name": "EA Sports FC 26",
+        "platform": "PS4/PS5",
+        "difficulty": "AMATEUR"
+      },
+      "match": {
+        "duration_minutes": 15,
+        "half_minutes": 6,
+        "break_minutes": 2
+      },
+      "rules": {
+        "late_minutes": 5,
+        "claim_minutes": 2,
+        "ban_tournaments": 3
+      },
+      "registration": {
+        "amount_fcfa": 3500
+      },
+      "prizes": {
+        "first_fcfa": 100000,
+        "second_fcfa": 50000
+      },
+      "consoles": {
+        "active_count": 6
+      },
+      "schedule": {
+        "saturday_arrival": "07:00",
+        "saturday_briefing": "08:00",
+        "sunday_arrival": "08:00",
+        "ceremony_time": "20:00"
+      },
+      "payment": {
+        "mtn_number": "",
+        "mtn_holder_name": "",
+        "airtel_number": "",
+        "airtel_holder_name": ""
+      }
+    }'::jsonb,
+    false,
+    'Valeurs par défaut pré-remplies dans les formulaires de création de tournoi. Structure miroir de tournaments.config. Pour le lieu, utiliser event_location.'
+  )
+ON CONFLICT (key) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
 -- Vérification post-migration
 -- ---------------------------------------------------------------------------
 -- SELECT key, is_secret FROM app_config ORDER BY key;
--- Doit retourner 11 lignes.
+-- Doit retourner 12 lignes (11 M00 + 1 M03 : tournament_defaults)
