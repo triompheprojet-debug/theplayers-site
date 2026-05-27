@@ -15,7 +15,8 @@
     "db:reset": "supabase db reset",
     "db:migrate:new": "supabase migration new",
     "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --linked > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --linked > src/types/database.types.ts",
+    "create-admin": "tsx --env-file=.env.local scripts/create-super-admin.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -27,6 +28,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.3.0",
+    "jose": "^6.2.3",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
@@ -51,6 +53,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
@@ -59,7 +62,9 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "supabase": "^2.101.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.3",
     "typescript": "^5",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "ws": "^8.21.0"
   }
 }
