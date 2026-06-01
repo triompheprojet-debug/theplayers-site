@@ -1,16 +1,34 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { updateSupabaseSession } from '@/lib/supabase/middleware'
+import { ROUTES } from '@/config/routes'
 
 /**
- * Middleware racine — version minimale M00.
+ * Middleware racine.
  *
- * Sera enrichi par :
- * - M02 : protection des routes /admin/* (vérification session admin + role)
- * - M06 : refresh de la session Supabase Auth pour les routes /joueur/*
+ * - Rafraîchit la session Supabase Auth à chaque requête (cookies) — requis par
+ *   @supabase/ssr pour les joueurs.
+ * - Protège l'espace joueur : /joueur/* exige une session Supabase valide,
+ *   sinon redirection vers /connexion (avec ?next pour revenir après login).
  *
- * Pour l'instant : passe-plat. Aucune route n'est protégée.
+ * NB : les routes /admin/* utilisent l'auth custom (M02) et sont protégées au
+ * niveau du layout (requireAdmin), pas ici.
  */
-export function middleware() {
-  return NextResponse.next()
+export async function middleware(request: NextRequest) {
+  const { supabaseResponse, user } = await updateSupabaseSession(request)
+
+  const { pathname } = request.nextUrl
+
+  if (pathname.startsWith('/joueur')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = ROUTES.signIn
+      url.searchParams.set('next', pathname)
+      return NextResponse.redirect(url)
+    }
+  }
+
+  return supabaseResponse
 }
 
 export const config = {
