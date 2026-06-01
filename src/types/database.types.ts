@@ -87,6 +87,13 @@ export type Database = {
             referencedRelation: "admin_accounts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activity_log_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       admin_accounts: {
@@ -179,6 +186,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          best_finish: string | null
+          blocked_until: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          is_blocked: boolean
+          is_deleted: boolean
+          last_name: string | null
+          phone: string
+          pseudo: string
+          total_points: number
+          tournaments_played: number
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          best_finish?: string | null
+          blocked_until?: string | null
+          created_at?: string
+          first_name?: string | null
+          id: string
+          is_blocked?: boolean
+          is_deleted?: boolean
+          last_name?: string | null
+          phone: string
+          pseudo: string
+          total_points?: number
+          tournaments_played?: number
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          best_finish?: string | null
+          blocked_until?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          is_blocked?: boolean
+          is_deleted?: boolean
+          last_name?: string | null
+          phone?: string
+          pseudo?: string
+          total_points?: number
+          tournaments_played?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       seasons: {
         Row: {
@@ -328,6 +386,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tournaments_runner_up_player_id_fkey"
+            columns: ["runner_up_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tournaments_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
@@ -335,10 +400,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tournaments_third_player_id_fkey"
+            columns: ["third_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tournaments_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournaments_winner_player_id_fkey"
+            columns: ["winner_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -454,10 +533,31 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "tournaments_runner_up_player_id_fkey"
+            columns: ["runner_up_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tournaments_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournaments_third_player_id_fkey"
+            columns: ["third_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournaments_winner_player_id_fkey"
+            columns: ["winner_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
