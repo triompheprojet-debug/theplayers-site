@@ -160,20 +160,61 @@ COMMENT ON FUNCTION get_active_tournament() IS
 
 GRANT EXECUTE ON FUNCTION get_active_tournament() TO anon, authenticated, service_role;
 
--- ---------------------------------------------------------------------------
--- Vérifications post-migration
--- ---------------------------------------------------------------------------
--- Test 1 : aucune fiche active
--- UPDATE app_config SET value = 'null'::jsonb WHERE key = 'active_tournament_id';
--- SELECT * FROM get_active_tournament();
--- → 0 ligne
---
--- Test 2 : fiche active (après création d'un tournoi T1)
--- UPDATE app_config SET value = to_jsonb('<uuid-T1>'::text) WHERE key = 'active_tournament_id';
--- SELECT id, name, game_info FROM get_active_tournament();
--- → 1 ligne, capacity ABSENT
---
--- Test 3 : id pointant vers tournoi soft-deleted
--- UPDATE tournaments SET is_deleted = true WHERE id = '<uuid-T1>';
--- SELECT * FROM get_active_tournament();
--- → 0 ligne
+
+
+CREATE OR REPLACE FUNCTION public.assign_badge_number(p_registration_id uuid)
+RETURNS int
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_tournament_id uuid;
+  v_current_badge int;
+  v_next_badge    int;
+BEGIN
+  -- 1. Récupérer le tournoi + badge actuel de l'inscription cible
+  SELECT tournament_id, badge_number
+    INTO v_tournament_id, v_current_badge
+  FROM public.registrations
+  WHERE id = p_registration_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Inscription % introuvable', p_registration_id;
+  END IF;
+
+  -- 2. Déjà un badge → ne rien faire (idempotent)
+  IF v_current_badge IS NOT NULL THEN
+    RETURN v_current_badge;
+  END IF;
+
+  -- 3. Verrou atomique par tournoi : sérialise les attributions concurrentes
+  --    sur le même tournoi sans bloquer les autres tournois.
+  PERFORM pg_advisory_xact_lock(hashtext(v_tournament_id::text));
+
+  -- 4. Prochain numéro libre pour CE tournoi (étanchéité — Règle 12)
+  SELECT COALESCE(MAX(badge_number), 0) + 1
+    INTO v_next_badge
+  FROM public.registrations
+  WHERE tournament_id = v_tournament_id;
+
+  -- 5. Écrire le badge
+  UPDATE public.registrations
+     SET badge_number = v_next_badge
+   WHERE id = p_registration_id;
+
+  RETURN v_next_badge;
+END;
+$$;
+
+COMMENT ON FUNCTION public.assign_badge_number(uuid) IS
+  'Attribue atomiquement le prochain badge_number libre du tournoi à une inscription (advisory lock par tournoi). Idempotent si déjà attribué. Appelé par le trigger assign_badge_on_confirm (M08).';
+
+-- service_role uniquement (le trigger l'exécute en DEFINER ; pas d'appel direct client)
+REVOKE ALL ON FUNCTION public.assign_badge_number(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.assign_badge_number(uuid) TO service_role;
+
+-- ============================================================================
+-- Vérification
+-- ============================================================================
+-- SELECT proname FROM pg_proc WHERE proname = 'assign_badge_number';  -- 1 ligne
