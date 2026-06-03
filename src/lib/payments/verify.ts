@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { logActivity } from '@/lib/activity/log'
+import { generateDocumentForRegistration } from '@/lib/documents/generate-pdf'
 import { confirmRegistration } from '@/lib/registrations/confirm'
 import { revertRegistrationToReserved } from '@/lib/registrations/reject'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
@@ -15,7 +16,8 @@ const PROOF_URL_TTL_SECONDS = 300 // aperçu privé court (Règle preuves)
 /**
  * Vérification des preuves de paiement par l'admin (M10).
  *
- * - confirmPayment : paiement → confirmed, inscription → confirmed (badge auto).
+ * - confirmPayment : paiement → confirmed, inscription → confirmed (badge auto),
+ *   puis génération best-effort du document officiel (M11).
  * - rejectPayment  : paiement → rejected (+ motif), inscription → reserved.
  * - listPendingPayments / getPendingPaymentsCount : file d'attente.
  * - getProofSignedUrl : aperçu privé temporaire de la preuve.
@@ -201,6 +203,20 @@ export async function confirmPayment(
       badge_number: reg.badgeNumber,
     },
   })
+
+  // 3. Génération best-effort du document officiel (reçu + badge PDF, M11).
+  //    Ne bloque JAMAIS la confirmation : en cas d'échec, l'admin pourra
+  //    régénérer (M11 étape 2). On journalise seulement l'éventuel écart.
+  try {
+    const doc = await generateDocumentForRegistration(payment.registration_id, {
+      generatedByAdminId: adminId,
+    })
+    if (!doc.ok) {
+      console.error('[confirmPayment:document]', doc.reason)
+    }
+  } catch (err) {
+    console.error('[confirmPayment:document]', err)
+  }
 
   return { ok: true, badgeNumber: reg.badgeNumber }
 }

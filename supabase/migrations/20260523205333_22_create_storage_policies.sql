@@ -57,3 +57,27 @@ COMMIT;
 --
 -- Rappel : le bucket reste PRIVÉ. L'accès admin se fait par URL signée
 -- générée en service_role (createSignedUrl), jamais par accès public.
+
+-- =====================================================================
+-- Extension de 22_create_storage_policies.sql — policies bucket `documents`
+-- =====================================================================
+-- Le bucket `documents` existe déjà (privé, 5 Mo, application/pdf).
+-- À AJOUTER au contenu existant de 22 (ne pas réécrire les policies des
+-- buckets avatars / payment-proofs / tournament-assets).
+--
+-- Convention de chemin : {player_id}/{tournament_id}/{registration_id}_badge.pdf
+-- → le 1er segment doit être le player_id pour que `select_own` fonctionne.
+-- L'écriture (upload) est faite côté serveur en service_role (bypass RLS) :
+-- aucune policy INSERT `authenticated` n'est nécessaire.
+-- =====================================================================
+ 
+drop policy if exists documents_select_own on storage.objects;
+create policy documents_select_own
+  on storage.objects
+  for select
+  to authenticated
+  using (
+    bucket_id = 'documents'
+    and (storage.foldername(name))[1] = (auth.uid())::text
+  );
+ 
