@@ -187,6 +187,292 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          file_size_bytes: number | null
+          generated_at: string
+          generated_by: string | null
+          id: string
+          is_valid: boolean
+          player_id: string
+          qr_encrypted_payload: string | null
+          qr_signature: string | null
+          qr_version: number
+          registration_id: string
+          storage_path: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          file_size_bytes?: number | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_valid?: boolean
+          player_id: string
+          qr_encrypted_payload?: string | null
+          qr_signature?: string | null
+          qr_version?: number
+          registration_id: string
+          storage_path: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          file_size_bytes?: number | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_valid?: boolean
+          player_id?: string
+          qr_encrypted_payload?: string | null
+          qr_signature?: string | null
+          qr_version?: number
+          registration_id?: string
+          storage_path?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          allow_replies: boolean
+          body: string
+          broadcast_scope: string | null
+          created_at: string
+          id: string
+          parent_message_id: string | null
+          read_at: string | null
+          recipient_player_id: string | null
+          scheduled_for: string | null
+          sender_admin_id: string | null
+          sender_player_id: string | null
+          sender_type: string
+          sent_at: string
+          subject: string
+          tournament_id: string | null
+        }
+        Insert: {
+          allow_replies?: boolean
+          body: string
+          broadcast_scope?: string | null
+          created_at?: string
+          id?: string
+          parent_message_id?: string | null
+          read_at?: string | null
+          recipient_player_id?: string | null
+          scheduled_for?: string | null
+          sender_admin_id?: string | null
+          sender_player_id?: string | null
+          sender_type: string
+          sent_at?: string
+          subject: string
+          tournament_id?: string | null
+        }
+        Update: {
+          allow_replies?: boolean
+          body?: string
+          broadcast_scope?: string | null
+          created_at?: string
+          id?: string
+          parent_message_id?: string | null
+          read_at?: string | null
+          recipient_player_id?: string | null
+          scheduled_for?: string | null
+          sender_admin_id?: string | null
+          sender_player_id?: string | null
+          sender_type?: string
+          sent_at?: string
+          subject?: string
+          tournament_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_recipient_player_id_fkey"
+            columns: ["recipient_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_admin_id_fkey"
+            columns: ["sender_admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_player_id_fkey"
+            columns: ["sender_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_fcfa: number
+          created_at: string
+          id: string
+          internal_note: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          player_id: string
+          proof_file_url: string | null
+          registration_id: string
+          rejection_reason: string | null
+          sender_name: string | null
+          sender_phone: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          submitted_at: string
+          time_slot: string | null
+          tournament_id: string
+          transaction_ref: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount_fcfa: number
+          created_at?: string
+          id?: string
+          internal_note?: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          player_id: string
+          proof_file_url?: string | null
+          registration_id: string
+          rejection_reason?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          submitted_at?: string
+          time_slot?: string | null
+          tournament_id: string
+          transaction_ref?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount_fcfa?: number
+          created_at?: string
+          id?: string
+          internal_note?: string | null
+          method?: Database["public"]["Enums"]["payment_method"]
+          player_id?: string
+          proof_file_url?: string | null
+          registration_id?: string
+          rejection_reason?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          submitted_at?: string
+          time_slot?: string | null
+          tournament_id?: string
+          transaction_ref?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -237,6 +523,166 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      qr_scan_log: {
+        Row: {
+          badge_number: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          player_id: string | null
+          raw_payload: string | null
+          result: string
+          scanned_at: string
+          scanned_by: string | null
+          tournament_id: string | null
+        }
+        Insert: {
+          badge_number?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          raw_payload?: string | null
+          result: string
+          scanned_at?: string
+          scanned_by?: string | null
+          tournament_id?: string | null
+        }
+        Update: {
+          badge_number?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          raw_payload?: string | null
+          result?: string
+          scanned_at?: string
+          scanned_by?: string | null
+          tournament_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_scan_log_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qr_scan_log_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qr_scan_log_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qr_scan_log_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registrations: {
+        Row: {
+          badge_number: number | null
+          cancelled_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          final_position: number | null
+          final_round: string | null
+          id: string
+          notes: string | null
+          player_id: string
+          points_earned: number
+          registered_at: string
+          registered_by_admin: string | null
+          registered_via: string
+          rejected_at: string | null
+          status: Database["public"]["Enums"]["registration_status"]
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          badge_number?: number | null
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          final_position?: number | null
+          final_round?: string | null
+          id?: string
+          notes?: string | null
+          player_id: string
+          points_earned?: number
+          registered_at?: string
+          registered_by_admin?: string | null
+          registered_via?: string
+          rejected_at?: string | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          badge_number?: number | null
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          final_position?: number | null
+          final_round?: string | null
+          id?: string
+          notes?: string | null
+          player_id?: string
+          points_earned?: number
+          registered_at?: string
+          registered_by_admin?: string | null
+          registered_via?: string
+          rejected_at?: string | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_registered_by_admin_fkey"
+            columns: ["registered_by_admin"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seasons: {
         Row: {
@@ -564,6 +1010,10 @@ export type Database = {
       }
     }
     Functions: {
+      assign_badge_number: {
+        Args: { p_registration_id: string }
+        Returns: number
+      }
       get_active_tournament: {
         Args: never
         Returns: {
