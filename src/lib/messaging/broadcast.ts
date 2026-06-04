@@ -4,6 +4,10 @@ import { logActivity } from '@/lib/activity/log'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import { getActiveTournamentForAdmin } from '@/lib/tournaments/active'
 
+import type { Database } from '@/types/database.types'
+
+type RegistrationStatus = Database['public']['Enums']['registration_status']
+
 /**
  * Envoi GROUPE (broadcast) admin -> joueurs du TOURNOI ACTIF (etancheite,
  * Regle 12). Une ligne `messages` par destinataire (decision B) : plus simple
@@ -29,10 +33,11 @@ export type BroadcastResult =
       reason: 'no_active_tournament' | 'no_recipients' | 'db_error'
     }
 
-const STATUSES_BY_SCOPE: Record<BroadcastScope, readonly string[]> = {
-  all_confirmed: ['confirmed'],
-  all_registered: ['reserved', 'awaiting_verification', 'confirmed'],
-}
+const STATUSES_BY_SCOPE: Record<BroadcastScope, readonly RegistrationStatus[]> =
+  {
+    all_confirmed: ['confirmed'],
+    all_registered: ['reserved', 'awaiting_verification', 'confirmed'],
+  }
 
 export async function broadcastMessage(
   args: BroadcastArgs,
