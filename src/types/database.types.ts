@@ -371,6 +371,67 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          body: string | null
+          created_at: string
+          id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          payload: Json | null
+          player_id: string
+          read_at: string | null
+          title: string
+          tournament_id: string | null
+        }
+        Insert: {
+          action_url?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          payload?: Json | null
+          player_id: string
+          read_at?: string | null
+          title: string
+          tournament_id?: string | null
+        }
+        Update: {
+          action_url?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          payload?: Json | null
+          player_id?: string
+          read_at?: string | null
+          title?: string
+          tournament_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_fcfa: number
