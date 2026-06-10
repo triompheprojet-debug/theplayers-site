@@ -1,39 +1,41 @@
 /**
- * TopBar admin (M03.B).
- *
- * Affiche le contexte actif (tournoi en vedette + dates) et signale
- * visuellement quand aucun tournoi n'est défini.
- *
- * Server Component : lit `getActiveTournamentForAdmin()` côté serveur.
- * Le bouton "Changer" interactif arrivera en M03.C (ActiveTournamentSwitcher,
- * Client + modale shadcn). Pour l'instant on rend juste l'état courant.
- *
- * Positionnement : fixed top, à droite de la sidebar (left-[264px]),
- * hauteur 64px (h-16), z-30.
+ * TopBar admin (refonte présentationnelle).
+ * Server Component : lit le tournoi actif + la session. Affiche le contexte
+ * actif ; le sélecteur (Client) reste réservé aux SUPER_ADMIN. No-Line.
  */
 import { Calendar } from 'lucide-react'
 import Link from 'next/link'
 
+import { ActiveTournamentSwitcher } from '@/components/layout/ActiveTournamentSwitcher'
 import { TournamentTypeBadge } from '@/components/shared/TournamentTypeBadge'
 import { ROUTES } from '@/config/routes'
+import { requireAdmin } from '@/lib/auth/permissions'
+import { getActiveTournamentId } from '@/lib/config/active-tournament'
 import { getActiveTournamentForAdmin } from '@/lib/tournaments/active'
+import { listSelectableTournaments } from '@/lib/tournaments/list-selectable'
 import { cn } from '@/lib/utils'
 
 export async function AdminTopBar() {
-  const active = await getActiveTournamentForAdmin()
+  const [session, active, currentId, tournaments] = await Promise.all([
+    requireAdmin(),
+    getActiveTournamentForAdmin(),
+    getActiveTournamentId(),
+    listSelectableTournaments(),
+  ])
+
+  const canSwitch = session.role === 'super_admin'
 
   return (
     <header
       className={cn(
         'fixed top-0 right-0 left-66 z-30 h-16',
         'flex items-center justify-between gap-4 px-6',
-        'bg-surface-1 border-b border-border',
-        'pt-0.5', // ne pas chevaucher AdminRedLine
+        'bg-surface-1 pt-0.5',
       )}
     >
-      {/* ─── Contexte actif ──────────────────────────────────────────── */}
+      {/* ─── Contexte actif (gauche) ─────────────────────────────────── */}
       <div className="flex items-center gap-3 min-w-0">
-        <span className="text-[10px] uppercase tracking-wider font-semibold text-text-secondary shrink-0">
+        <span className="shrink-0 text-[10px] uppercase tracking-wider font-semibold text-text-muted">
           Contexte actif
         </span>
 
@@ -49,18 +51,21 @@ export async function AdminTopBar() {
         )}
       </div>
 
-      {/* ─── Placeholder switcher (M03.C) ────────────────────────────── */}
+      {/* ─── Sélecteur (droite) — SUPER_ADMIN uniquement ─────────────── */}
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-text-secondary">
-          {/* Bouton "Changer" branché en M03.C */}
-        </span>
+        {canSwitch && (
+          <ActiveTournamentSwitcher
+            currentActiveId={currentId}
+            tournaments={tournaments}
+          />
+        )}
       </div>
     </header>
   )
 }
 
 // ===========================================================================
-// Sous-composant : contexte affiché quand un tournoi est actif
+// Contexte affiché quand un tournoi est actif
 // ===========================================================================
 interface ActiveContextProps {
   name: string
@@ -91,7 +96,7 @@ function ActiveContext({ name, type, startDate, endDate }: ActiveContextProps) {
 }
 
 // ===========================================================================
-// Sous-composant : aucun tournoi actif
+// Aucun tournoi actif
 // ===========================================================================
 function NoActiveContext() {
   return (
@@ -110,7 +115,7 @@ function NoActiveContext() {
 }
 
 // ===========================================================================
-// Format de plage de dates "DD MMM YYYY → DD MMM YYYY" en français
+// Format de plage de dates
 // ===========================================================================
 function formatDateRange(start: string, end: string): string {
   const formatter = new Intl.DateTimeFormat('fr-FR', {
@@ -118,6 +123,5 @@ function formatDateRange(start: string, end: string): string {
     month: 'short',
     year: 'numeric',
   })
-  // Les dates DB sont au format YYYY-MM-DD ; Date() les parse en UTC.
   return `${formatter.format(new Date(start))} → ${formatter.format(new Date(end))}`
 }

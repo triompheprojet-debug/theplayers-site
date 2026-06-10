@@ -1,8 +1,7 @@
 'use client'
 
+import { Download, FileText } from 'lucide-react'
 import { useTransition } from 'react'
-
-import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -30,35 +29,53 @@ export function DocumentCard({ doc }: { doc: PlayerDocument }) {
     })
   }
 
-  return (
-    <div className="bg-surface-1 rounded-2xl p-6">
-      <p className="text-text-secondary text-xs uppercase tracking-wider">
-        {doc.tournamentName}
-      </p>
+  const badge =
+    doc.badgeNumber != null
+      ? `#${String(doc.badgeNumber).padStart(3, '0')}`
+      : null
 
-      <div className="mt-2 flex items-end justify-between gap-4">
+  return (
+    <article className="space-y-4 rounded-2xl bg-surface-1 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface-2 text-accent-violet">
+            <FileText className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-semibold text-text-primary">{'Reçu & badge'}</h2>
+            <p className="truncate text-xs uppercase tracking-wider text-text-secondary">
+              {doc.tournamentName}
+            </p>
+          </div>
+        </div>
+        <span className="shrink-0 rounded-full bg-success-neon/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-neon">
+          Disponible
+        </span>
+      </div>
+
+      <div className="flex items-end justify-between gap-4 rounded-xl bg-surface-2 p-4">
         <div>
-          <p className="text-text-secondary text-sm">Numéro de badge</p>
-          <p className="text-4xl font-bold">
-            {doc.badgeNumber != null
-              ? String(doc.badgeNumber).padStart(3, '0')
-              : '—'}
+          <p className="text-xs uppercase tracking-wider text-text-secondary">
+            N° joueur
+          </p>
+          <p className="font-mono text-3xl font-bold tracking-wider text-text-primary">
+            {badge ?? '—'}
           </p>
         </div>
-        <p className="text-text-secondary text-xs">
+        <p className="font-mono text-xs text-text-secondary">
           {formatDate(doc.generatedAt)}
         </p>
       </div>
 
       <Button
-        className="mt-4 min-h-12 w-full"
-        disabled={isPending}
         onClick={handleDownload}
+        disabled={isPending}
+        className="min-h-12 w-full bg-accent-violet text-white hover:bg-accent-violet/90"
       >
-        <Download className="mr-2 h-4 w-4" aria-hidden />
-        Télécharger le PDF
+        <Download className="h-4 w-4" aria-hidden="true" />
+        {isPending ? 'Préparation…' : 'Télécharger le PDF'}
       </Button>
-    </div>
+    </article>
   )
 }
 

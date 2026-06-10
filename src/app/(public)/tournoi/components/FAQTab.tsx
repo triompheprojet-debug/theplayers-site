@@ -9,13 +9,6 @@ interface FAQTabProps {
   registration: PublicTournamentConfig['registration']
 }
 
-/**
- * Onglet FAQ : accordéon natif (details/summary) — zéro JS, idéal réseau pauvre.
- *
- * Le contenu métier (engagement de paiement, distinction Hors Saison / Saison)
- * provient du cahier des charges ; le montant d'inscription vient de la config
- * (zéro hardcode). Server Component.
- */
 export function FAQTab({ tournamentType, registration }: FAQTabProps) {
   const amountLabel =
     registration?.amount_fcfa !== undefined
@@ -54,21 +47,27 @@ export function FAQTab({ tournamentType, registration }: FAQTabProps) {
   })
 
   return (
-    <ul className="space-y-2">
-      {faqs.map((faq) => (
-        <li key={faq.q}>
-          <details className="group rounded-2xl bg-surface-1 p-5 [&_summary]:list-none">
-            <summary className="flex min-h-[44px] cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-text-primary">
-              {faq.q}
-              <ChevronDown
-                className="size-4 shrink-0 text-text-secondary transition-transform group-open:rotate-180"
-                aria-hidden
-              />
-            </summary>
-            <p className="mt-3 text-sm text-text-secondary">{faq.a}</p>
-          </details>
-        </li>
-      ))}
-    </ul>
+    <div className="flex flex-col gap-5">
+      <h2 className="text-2xl font-bold text-accent-violet md:text-3xl">
+        Questions fréquentes
+      </h2>
+
+      <ul className="flex flex-col gap-2">
+        {faqs.map((faq) => (
+          <li key={faq.q}>
+            <details className="group rounded-2xl bg-surface-1 p-5 [&_summary]:list-none">
+              <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-text-primary">
+                {faq.q}
+                <ChevronDown
+                  className="size-4 shrink-0 text-text-secondary transition-transform group-open:rotate-180"
+                  aria-hidden
+                />
+              </summary>
+              <p className="mt-3 text-sm text-text-secondary">{faq.a}</p>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LIGA ESPORT FC - Partenaires</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --flux-glow: #8b5cf6;
+            --flux-success: #00f781;
+        }
+        
+        body {
+            background-color: #0c0e14;
+            color: #e2e1eb;
+            overflow-x: hidden;
+        }
+
+        .bg-fixed-pattern {
+            background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLuuQRTJcK7xuUo6yJTlDFRyZxRE5d_ERZmxGxv225Dt-FF8HgvP_YF0TAmjVSHkUfpfLAGcOrg3eHcVd9FC_RdWeuuEUCCa8MIHTzLGoT8QtgI2wOEjzhzGhHjhUUMhawHURc4qpBKo3KvCGyqWnTcBnWAbDLvwrM9IhLWIZR03pWE_b0oa1aWJo7dK0913Mg36f2xyuD9BbEWGPM_ulNm6FSk1HXBwLcH4io1cPJZWRjqT0nfmPxuffN0');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .glass-card {
+            background: rgba(30, 31, 38, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+
+        .flux-title {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.2);
+        }
+
+        .monochrome-logo {
+            filter: grayscale(1) brightness(0.7);
+            transition: all 0.3s ease;
+        }
+
+        .monochrome-logo:hover {
+            filter: grayscale(0) brightness(1);
+            transform: scale(1.1);
+        }
+
+        .cta-button-glow {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button-glow::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, var(--flux-glow) 360deg);
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .asymmetric-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "primary-fixed": "#e9ddff",
+                "primary-container": "#a078ff",
+                "on-tertiary": "#4c2700",
+                "on-tertiary-container": "#432100",
+                "on-error-container": "#ffdad6",
+                "tertiary": "#ffb77a",
+                "surface-variant": "#33343c",
+                "secondary-fixed-dim": "#00e477",
+                "primary-fixed-dim": "#d0bcff",
+                "secondary-container": "#00f781",
+                "surface-container": "#1e1f26",
+                "on-surface-variant": "#cbc3d7",
+                "on-surface": "#e2e1eb",
+                "tertiary-fixed": "#ffdcc2",
+                "inverse-surface": "#e2e1eb",
+                "on-primary": "#3c0091",
+                "background": "#12131a",
+                "surface-bright": "#383940",
+                "on-background": "#e2e1eb",
+                "on-primary-container": "#340080",
+                "surface-container-highest": "#33343c",
+                "surface": "#12131a",
+                "on-primary-fixed": "#23005c",
+                "secondary": "#d1ffd7",
+                "on-error": "#690005",
+                "surface-container-lowest": "#0c0e14",
+                "outline": "#958ea0",
+                "on-secondary-fixed-variant": "#005227",
+                "outline-variant": "#494454",
+                "on-tertiary-fixed-variant": "#6d3a00",
+                "error-container": "#93000a",
+                "tertiary-container": "#d7790d",
+                "primary": "#d0bcff",
+                "surface-container-high": "#282a31",
+                "error": "#ffb4ab",
+                "inverse-primary": "#6d3bd7",
+                "on-secondary-fixed": "#00210c",
+                "on-secondary-container": "#006c35",
+                "on-primary-fixed-variant": "#5516be",
+                "on-secondary": "#003919",
+                "surface-tint": "#d0bcff",
+                "inverse-on-surface": "#2f3037",
+                "tertiary-fixed-dim": "#ffb77a",
+                "secondary-fixed": "#61ff97",
+                "surface-dim": "#12131a",
+                "surface-container-low": "#1a1b22",
+                "on-tertiary-fixed": "#2e1500"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+              },
+              "spacing": {
+                "xl": "64px",
+                "sm": "12px",
+                "lg": "40px",
+                "xs": "4px",
+                "md": "24px",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "base": "8px"
+              },
+              "fontFamily": {
+                "display-hero": ["Inter"],
+                "score-display": ["JetBrains Mono"],
+                "label-caps": ["Inter"],
+                "headline-md": ["Inter"],
+                "technical-data": ["JetBrains Mono"],
+                "headline-lg": ["Inter"],
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                "display-hero": ["48px", {"lineHeight": "1.1", "letterSpacing": "0.05em", "fontWeight": "800"}],
+                "score-display": ["40px", {"lineHeight": "1.0", "fontWeight": "700"}],
+                "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                "technical-data": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-fixed-pattern min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Header Section -->
+<header class="relative pt-xl pb-lg px-margin-mobile md:px-lg flex flex-col items-center justify-center text-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none"></div>
+<div class="z-10">
+<span class="font-technical-data text-label-caps text-primary tracking-[0.3em] uppercase mb-4 block">Écosystème Esport</span>
+<h1 class="font-display-hero text-display-hero flux-title text-primary uppercase mb-6">
+                Nos Partenaires
+            </h1>
+<p class="font-body-lg text-on-surface-variant max-w-2xl mx-auto">
+                Collaborer avec les leaders du marché pour offrir une expérience de compétition sans précédent au Congo.
+            </p>
+</div>
+</header>
+<!-- Main Partners Showcase: Asymmetric Bento Style -->
+<main class="max-w-[1200px] mx-auto px-margin-mobile md:px-lg mb-xl">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter items-stretch">
+<!-- MTN Card -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between group">
+<div class="mb-lg">
+<div class="flex justify-between items-start mb-md">
+<img alt="MTN Logo" class="h-16 w-auto object-contain" data-alt="Official high-resolution logo of MTN, featuring the iconic yellow and blue color scheme on a transparent background. The image is clean and professional, representing a major telecommunications provider. This visual is integrated into a premium dark esports UI designed for high-end professional tournament broadcasting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD03jhkwkRSkQ8EQp__lJh0ONrhMl7he2ib7scUUPyjuTKC4gDhQSFUWBahrvxqPb6uJP-FJpvqCM0cMtzgyKfLpHfq3MU4uspMkmt5dUKpU3F12nVbHu3Z7yR_IDP0SUbhgPlHY7OJWNAD2xzgdbXvbxZMVslNuKjcHbvjKsRjPYK3vx8CYICODjWIDXp2yjWSxv8r7f4XPBUkYbPydGy5e9bANTipVWXrLhnsunez36H9B_f7aAqJ2rSnZdvu9Hese6Odr5sSe50"/>
+<span class="font-technical-data text-label-caps text-secondary-fixed-dim bg-secondary-fixed-dim/10 px-sm py-xs rounded-full border border-secondary-fixed-dim/20">PARTENAIRE DIAMANT</span>
+</div>
+<h3 class="font-headline-lg text-on-surface mb-sm uppercase">MTN MoMo</h3>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                        Facilitateur officiel des transactions et du cash-prize. Avec MTN Mobile Money, l'inscription et la réception de vos récompenses se font en un clin d'œil, garantissant sécurité et rapidité pour tous nos joueurs.
+                    </p>
+</div>
+<div class="flex items-center gap-base">
+<div class="w-10 h-[2px] bg-primary group-hover:w-16 transition-all duration-300"></div>
+<span class="font-technical-data text-label-caps text-primary">PAIEMENT SÉCURISÉ</span>
+</div>
+</div>
+<!-- Airtel Card -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between group">
+<div class="mb-lg">
+<div class="flex justify-between items-start mb-md">
+<img alt="Airtel Logo" class="h-16 w-auto object-contain" data-alt="Official high-resolution logo of Airtel, showcasing the distinctive red and white branding elements against a transparent backdrop. The aesthetic is sharp and corporate, conveying trust and widespread connectivity. It is placed within a dark-themed digital cockpit interface emphasizing technical precision and competitive esports energy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnw4PhDMFrm7ZarNCoO2KLD8s5oVvm_dl34mc27zrsPHoBlDtK2F2uqf3g1NTcJBF1_xoa8a3zaOqPrKqQIQub590sjiORvKc5jqM13lnaW87FctOGTm5jEwou0X-3jOp6oj64TM-ma3fCHFASEEx4yQ5O6u0fOfm7Y0O6_rMqH69oncfo3LDqyDShoIuX6Nb6p5we_0eMhjKFh6gC1EEdFbe2qOdXw0jvTHtu-2d5l2WTxeGa5rZnLxjudtDTyJQzqCjFbWeEfO4"/>
+<span class="font-technical-data text-label-caps text-secondary-fixed-dim bg-secondary-fixed-dim/10 px-sm py-xs rounded-full border border-secondary-fixed-dim/20">PARTENAIRE DIAMANT</span>
+</div>
+<h3 class="font-headline-lg text-on-surface mb-sm uppercase">Airtel Money</h3>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                        Partenaire stratégique pour l'accessibilité numérique. Airtel Money permet à chaque talent de Pointe-Noire et au-delà de rejoindre la compétition sans barrières géographiques ni bancaires.
+                    </p>
+</div>
+<div class="flex items-center gap-base">
+<div class="w-10 h-[2px] bg-primary group-hover:w-16 transition-all duration-300"></div>
+<span class="font-technical-data text-label-caps text-primary">INCLUSION NUMÉRIQUE</span>
+</div>
+</div>
+</div>
+<!-- Collaborators Section -->
+<section class="mt-xl">
+<div class="flex items-center gap-md mb-lg">
+<h2 class="font-headline-md text-on-surface uppercase whitespace-nowrap">Collaborateurs &amp; Media</h2>
+<div class="h-[1px] w-full bg-surface-variant"></div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-md">
+<!-- Media Partners (Placeholders with Icons) -->
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col items-center justify-center aspect-square group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-[48px] monochrome-logo mb-2">broadcast_on_home</span>
+<span class="font-technical-data text-label-caps text-outline group-hover:text-primary transition-colors">CANAL+</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col items-center justify-center aspect-square group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-[48px] monochrome-logo mb-2">sports_esports</span>
+<span class="font-technical-data text-label-caps text-outline group-hover:text-primary transition-colors">EA SPORTS</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col items-center justify-center aspect-square group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-[48px] monochrome-logo mb-2">stadium</span>
+<span class="font-technical-data text-label-caps text-outline group-hover:text-primary transition-colors">MAIRIE PNR</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col items-center justify-center aspect-square group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-[48px] monochrome-logo mb-2">headset_mic</span>
+<span class="font-technical-data text-label-caps text-outline group-hover:text-primary transition-colors">G-GEAR</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col items-center justify-center aspect-square group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-[48px] monochrome-logo mb-2">monitor</span>
+<span class="font-technical-data text-label-caps text-outline group-hover:text-primary transition-colors">SAMSUNG</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col items-center justify-center aspect-square group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline text-[48px] monochrome-logo mb-2">theaters</span>
+<span class="font-technical-data text-label-caps text-outline group-hover:text-primary transition-colors">DRTV</span>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="mt-xl relative overflow-hidden rounded-3xl p-xl bg-surface-container-lowest/80 border border-primary/20 text-center">
+<!-- Decorative Elements -->
+<div class="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-secondary-fixed-dim/10 blur-[100px] rounded-full"></div>
+<div class="relative z-10">
+<h2 class="font-display-hero text-headline-lg md:text-display-hero text-on-surface uppercase mb-6">
+                    Propulsez Votre Marque
+                </h2>
+<p class="font-body-lg text-on-surface-variant max-w-xl mx-auto mb-lg">
+                    Rejoignez l'élite de l'esport au Congo. Devenez partenaire de la Liga Esport FC et touchez une audience jeune, engagée et technophile.
+                </p>
+<div class="flex flex-col items-center gap-md">
+<button class="cta-button-glow group px-10 py-5 rounded-full bg-background border border-transparent transition-all active:scale-95">
+<span class="flex items-center gap-sm">
+<span class="font-technical-data text-label-caps text-primary tracking-widest">NOUS REJOINDRE</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</span>
+</button>
+<div class="flex items-center gap-xs mt-4">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></span>
+<span class="font-technical-data text-xs text-on-surface-variant uppercase tracking-tighter">Opportunités de sponsoring ouvertes pour 2024</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Decorative Line -->
+<div class="w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-md"></div>
+<script>
+        // Micro-interaction for the CTA button and glass cards
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            const titles = document.querySelectorAll('.flux-title');
+            titles.forEach(title => {
+                const moveX = (x - 0.5) * 20;
+                const moveY = (y - 0.5) * 20;
+                title.style.textShadow = `${moveX}px ${moveY}px 30px rgba(139, 92, 246, 0.4), 0 0 20px rgba(139, 92, 246, 0.6)`;
+            });
+        });
+
+        // Simple scroll reveal effect for cards
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.glass-card, .bg-surface-container-low').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body></html>

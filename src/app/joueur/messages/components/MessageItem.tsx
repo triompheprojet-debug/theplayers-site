@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircleReply } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import Link from 'next/link'
 
 import { ROUTES } from '@/config/routes'
@@ -8,57 +8,58 @@ export interface MessageItemData {
   id: string
   subject: string
   snippet: string
-  sentAt: string
+  timeLabel: string
   unread: boolean
-  allowReplies: boolean
 }
 
 /**
- * Element de liste d'un message recu (espace joueur, mobile-first).
- * Zone tactile pleine largeur, pastille « non lu », indice de reponse possible.
+ * Élément de liste d'un message reçu (mobile-first). Avatar = icône Lucide
+ * cohérente (pas de photo). Point violet + heure violette quand non lu.
  */
 export function MessageItem({ message }: { message: MessageItemData }) {
   return (
     <Link
       href={ROUTES.player.messageDetail(message.id)}
-      className="flex items-center gap-3 rounded-xl bg-surface-1 p-4 transition-transform active:scale-[0.99]"
+      className="flex items-center gap-3 rounded-2xl bg-surface-1 p-4 transition-transform active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet"
     >
+      <span
+        className={cn(
+          'h-2 w-2 shrink-0 rounded-full',
+          message.unread
+            ? 'bg-accent-violet shadow-[0_0_8px_rgba(139,92,246,0.7)]'
+            : 'bg-transparent',
+        )}
+        aria-hidden="true"
+      />
+
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-2 text-accent-violet">
+        <Mail className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
+      </div>
+
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          {message.unread ? (
-            <span
-              className="size-2 shrink-0 rounded-full bg-accent-violet"
-              aria-label="Non lu"
-            />
-          ) : null}
+        <div className="flex items-center justify-between gap-2">
           <p
             className={cn(
-              'truncate text-sm',
-              message.unread
-                ? 'font-semibold text-text-primary'
-                : 'text-text-primary',
+              'truncate text-text-primary',
+              message.unread ? 'font-bold' : 'font-medium',
             )}
           >
+            {message.unread ? <span className="sr-only">Non lu. </span> : null}
             {message.subject}
           </p>
+          <span
+            className={cn(
+              'shrink-0 font-mono text-xs',
+              message.unread ? 'text-accent-violet' : 'text-text-secondary',
+            )}
+          >
+            {message.timeLabel}
+          </span>
         </div>
-        <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
+        <p className="mt-0.5 truncate text-sm text-text-secondary">
           {message.snippet}
         </p>
-        <div className="mt-2 flex items-center gap-3 text-[11px] text-text-secondary">
-          <span>{new Date(message.sentAt).toLocaleDateString('fr-FR')}</span>
-          {message.allowReplies ? (
-            <span className="inline-flex items-center gap-1">
-              <MessageCircleReply className="size-3" aria-hidden />
-              Reponse possible
-            </span>
-          ) : null}
-        </div>
       </div>
-      <ChevronRight
-        className="size-5 shrink-0 text-text-secondary"
-        aria-hidden
-      />
     </Link>
   )
 }

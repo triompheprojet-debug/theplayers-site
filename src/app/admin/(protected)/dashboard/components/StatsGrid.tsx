@@ -1,15 +1,7 @@
-import {
-  CheckCircle2,
-  Clock,
-  ClipboardList,
-  Hourglass,
-  type LucideIcon,
-} from 'lucide-react'
-
 import { cn } from '@/lib/utils'
 
 /**
- * Grille de statistiques d'inscriptions du tournoi actif (M10).
+ * Grille KPI d'inscriptions du tournoi actif.
  * Composant présentationnel : reçoit les compteurs déjà calculés.
  */
 export interface RegistrationStats {
@@ -17,57 +9,40 @@ export interface RegistrationStats {
   reserved: number
   awaitingVerification: number
   confirmed: number
+  rejected: number
 }
 
 interface StatItem {
   label: string
   value: number
-  icon: LucideIcon
   accent: string
 }
 
 export function StatsGrid({ stats }: { stats: RegistrationStats }) {
   const items: StatItem[] = [
+    { label: 'Total inscrits', value: stats.total, accent: 'text-text-primary' },
+    { label: 'Confirmés', value: stats.confirmed, accent: 'text-success-neon' },
     {
-      label: 'Inscrits (total actif)',
-      value: stats.total,
-      icon: ClipboardList,
-      accent: 'text-accent-violet',
-    },
-    {
-      label: 'Confirmés',
-      value: stats.confirmed,
-      icon: CheckCircle2,
-      accent: 'text-success-neon',
-    },
-    {
-      label: 'En vérification',
+      label: 'En attente',
       value: stats.awaitingVerification,
-      icon: Hourglass,
       accent: 'text-warning',
     },
-    {
-      label: 'Réservés',
-      value: stats.reserved,
-      icon: Clock,
-      accent: 'text-text-secondary',
-    },
+    { label: 'Rejetés', value: stats.rejected, accent: 'text-danger' },
   ]
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => (
-        <div
-          key={item.label}
-          className="rounded-xl bg-surface-1 border border-border p-4"
-        >
-          <div className="flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wider text-text-secondary">
-              {item.label}
-            </p>
-            <item.icon className={cn('size-4', item.accent)} aria-hidden />
-          </div>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-text-primary">
+        <div key={item.label} className="rounded-2xl bg-surface-1 p-5">
+          <p className="text-[11px] uppercase tracking-wider font-semibold text-text-secondary">
+            {item.label}
+          </p>
+          <p
+            className={cn(
+              'mt-3 font-mono text-4xl font-bold tabular-nums',
+              item.accent,
+            )}
+          >
             {item.value}
           </p>
         </div>

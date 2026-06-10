@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ['@react-pdf/renderer'],
 
+  // Inclure les assets lus via fs (logo PDF + logos opérateurs) dans le bundle serverless
+  outputFileTracingIncludes: {
+    '/**': [
+      './public/images/identite_site/logo.png',
+      './public/images/logo-mtn.png',
+      './public/images/logo-airtel.png',
+    ],
+  },
+
   // Images : Supabase Storage pour avatars, affiches de tournoi, preuves
   images: {
     remotePatterns: [

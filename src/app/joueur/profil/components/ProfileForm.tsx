@@ -32,6 +32,10 @@ interface ProfileFormProps {
   }
 }
 
+const LABEL_CLS = 'text-xs font-bold uppercase tracking-wider text-text-secondary'
+const INPUT_CLS =
+  'h-12 border-0 bg-background dark:bg-background focus-visible:ring-2 focus-visible:ring-accent-violet'
+
 /**
  * Édition des informations personnelles du joueur.
  * Le pseudo n'apparaît PAS (immuable, Règle 2 + trigger DB).
@@ -72,11 +76,11 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Prénom</FormLabel>
+              <FormLabel className={LABEL_CLS}>Prénom</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  className="h-12"
+                  className={INPUT_CLS}
                   autoComplete="given-name"
                   placeholder="Ton prénom"
                 />
@@ -91,11 +95,11 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
           name="lastName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel className={LABEL_CLS}>Nom</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  className="h-12"
+                  className={INPUT_CLS}
                   autoComplete="family-name"
                   placeholder="Ton nom"
                 />
@@ -110,11 +114,11 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Téléphone</FormLabel>
+              <FormLabel className={LABEL_CLS}>Numéro de téléphone</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  className="h-12"
+                  className={INPUT_CLS}
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
@@ -131,7 +135,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
           disabled={isSubmitting}
           className="min-h-12 w-full bg-accent-violet text-white hover:bg-accent-violet/90"
         >
-          {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+          {isSubmitting ? 'Enregistrement…' : 'Enregistrer les modifications'}
         </Button>
       </form>
     </Form>

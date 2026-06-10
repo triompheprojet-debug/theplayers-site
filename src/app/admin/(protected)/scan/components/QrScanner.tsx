@@ -1,41 +1,46 @@
 'use client'
 
-import { Camera, RotateCcw, ScanLine } from 'lucide-react'
+import { Camera, ImageUp, RotateCcw, ScanLine } from 'lucide-react'
+import jsQR from 'jsqr'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/config/routes'
+import { cn } from '@/lib/utils'
 import { useQrScannerStore } from '@/stores/qr-scanner.store'
 
 import { ScanResultBanner } from './ScanResultBanner'
 
 import type { ScanResult } from '@/lib/qr/verify'
 
-// `BarcodeDetector` n'est pas (encore) dans les types DOM standard.
-type BarcodeDetectorCtor = new (options?: { formats: string[] }) => {
-  detect: (source: CanvasImageSource) => Promise<{ rawValue: string }[]>
-}
+type Mode = 'camera' | 'upload'
 
-function getBarcodeDetector(): BarcodeDetectorCtor | null {
-  if (typeof window === 'undefined') return null
-  const ctor = (window as unknown as { BarcodeDetector?: BarcodeDetectorCtor })
-    .BarcodeDetector
-  return ctor ?? null
-}
+// Decodage cote CLIENT via jsQR (universel : desktop + mobile, toute camera ou
+// image). La chaine BRUTE est ensuite envoyee a POST /api/qr/verify : dechiffrement,
+// signature, tournoi, double-scan = 100% serveur (M11). Aucune cle cote client.
+const CAMERA_MAX_WIDTH = 640 // sous-echantillonnage video pour alleger le decodage
+const IMAGE_MAX_DIM = 1500 // borne la taille du canvas pour une image importee
+const DECODE_INTERVAL_MS = 150 // ~6-7 decodages/s en mode camera
 
 /**
- * Console de scan (jour J), mobile/tablette. Decode le QR cote CLIENT (camera
- * arriere) puis envoie la chaine BRUTE a `POST /api/qr/verify` : la validation
- * (dechiffrement, signature, tournoi, double-scan) est 100% serveur (M11/M13).
+ * Console de scan (jour J). Deux modes :
+ *  - Camera : flux video + decodage jsQR image par image (fonctionne aussi sur PC
+ *    avec webcam).
+ *  - Image : import d'une photo/capture du badge, decodee localement.
  */
 export function QrScanner() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const rafRef = useRef<number | null>(null)
   const scanningRef = useRef(false)
+  const lastDecodeRef = useRef(0)
 
+  const [mode, setMode] = useState<Mode>('camera')
   const [cameraError, setCameraError] = useState<string | null>(null)
-  const [unsupported, setUnsupported] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [decoding, setDecoding] = useState(false)
 
   const status = useQrScannerStore((s) => s.status)
   const lastResult = useQrScannerStore((s) => s.lastResult)
@@ -79,18 +84,15 @@ export function QrScanner() {
     [setResult],
   )
 
-  const begin = useCallback(async () => {
-    const Detector = getBarcodeDetector()
-    if (!Detector) {
-      setUnsupported(true)
-      return
-    }
+  const beginCamera = useCallback(async () => {
     setCameraError(null)
+    setUploadError(null)
     start()
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        // `ideal` plutot que `exact` : ne casse pas sur PC (webcam frontale).
+        video: { facingMode: { ideal: 'environment' } },
         audio: false,
       })
       streamRef.current = stream
@@ -99,59 +101,92 @@ export function QrScanner() {
       video.srcObject = stream
       await video.play()
     } catch {
-      setCameraError('Acces a la camera refuse ou indisponible.')
+      setCameraError(
+        'Camera indisponible (absente ou refusee). Utilise "Importer une image".',
+      )
       return
     }
 
-    const detector = new Detector({ formats: ['qr_code'] })
     scanningRef.current = true
+    lastDecodeRef.current = 0
 
     const loop = async () => {
       if (!scanningRef.current) return
-      const video = videoRef.current
-      if (video && video.readyState >= 2) {
-        try {
-          const codes = await detector.detect(video)
-          const raw = codes[0]?.rawValue
-          if (raw && scanningRef.current) {
-            scanningRef.current = false
-            const outcome = await submit(raw)
-            if (outcome === 'done') {
-              stopCamera()
-              return
-            }
-            scanningRef.current = true // incident reseau : on reprend
+
+      const now = performance.now()
+      if (now - lastDecodeRef.current >= DECODE_INTERVAL_MS) {
+        lastDecodeRef.current = now
+        const code = decodeFromVideo(videoRef.current, canvasRef.current)
+        if (code && scanningRef.current) {
+          scanningRef.current = false
+          const outcome = await submit(code)
+          if (outcome === 'done') {
+            stopCamera()
+            return
           }
-        } catch {
-          // frame illisible : on continue
+          scanningRef.current = true // incident reseau : on reprend
         }
       }
+
       rafRef.current = requestAnimationFrame(() => void loop())
     }
 
     rafRef.current = requestAnimationFrame(() => void loop())
   }, [start, submit, stopCamera])
 
+  const handleFile = useCallback(
+    async (file: File) => {
+      setUploadError(null)
+      setCameraError(null)
+      setDecoding(true)
+      try {
+        const code = await decodeFromImageFile(file)
+        if (!code) {
+          setUploadError('Aucun QR code detecte dans cette image.')
+          return
+        }
+        await submit(code)
+      } catch {
+        setUploadError("Impossible de lire l'image, reessaie.")
+      } finally {
+        setDecoding(false)
+      }
+    },
+    [submit],
+  )
+
+  // Arret de la camera quand on quitte le mode camera ou au demontage.
+  useEffect(() => {
+    if (mode !== 'camera') stopCamera()
+  }, [mode, stopCamera])
+
   useEffect(() => {
     return () => stopCamera()
   }, [stopCamera])
 
-  if (unsupported) {
-    return (
-      <div className="rounded-xl bg-surface-1 p-6 text-center">
-        <Camera className="mx-auto size-8 text-text-secondary" aria-hidden />
-        <p className="mt-3 text-sm text-text-secondary">
-          Le scan par camera n est pas pris en charge par ce navigateur. Utilise
-          Chrome sur Android, ou verifie le badge manuellement.
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-4">
+      {/* Selecteur de mode */}
+      <div className="flex gap-2">
+        <ModeButton
+          active={mode === 'camera'}
+          onClick={() => setMode('camera')}
+          icon={<Camera className="size-4" aria-hidden />}
+          label="Camera"
+        />
+        <ModeButton
+          active={mode === 'upload'}
+          onClick={() => {
+            stopCamera()
+            setMode('upload')
+          }}
+          icon={<ImageUp className="size-4" aria-hidden />}
+          label="Importer une image"
+        />
+      </div>
+
       {/* Compteurs de session */}
-      <div className="flex items-center justify-between rounded-lg bg-surface-1 px-4 py-3">
+      <div className="flex items-center justify-between rounded-xl bg-surface-1 px-4 py-3">
         <div className="flex gap-6">
           <span className="text-sm text-text-secondary">
             Valides <strong className="text-success-neon">{validCount}</strong>
@@ -174,49 +209,192 @@ export function QrScanner() {
         </Button>
       </div>
 
-      {/* Zone camera (toujours montee pour stabiliser le ref video) */}
-      <div className="relative overflow-hidden rounded-2xl bg-black">
-        <video
-          ref={videoRef}
-          playsInline
-          muted
-          className={
-            status === 'scanning'
-              ? 'block aspect-square w-full object-cover'
-              : 'hidden'
-          }
-        />
-        {status === 'scanning' ? (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="size-48 rounded-2xl border-2 border-accent-violet/70" />
+      {/* Canvas hors-ecran pour le decodage des frames camera */}
+      <canvas ref={canvasRef} className="hidden" />
+
+      {mode === 'camera' ? (
+        <>
+          <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-black">
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              className={
+                status === 'scanning'
+                  ? 'block aspect-square w-full object-cover'
+                  : 'hidden'
+              }
+            />
+            {status === 'scanning' ? (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="size-48 rounded-2xl ring-2 ring-accent-violet/70" />
+              </div>
+            ) : (
+              <div className="flex aspect-square w-full flex-col items-center justify-center gap-2 bg-surface-1">
+                <Camera className="size-8 text-text-secondary" aria-hidden />
+                <p className="text-xs text-text-secondary">
+                  Camera a l arret
+                </p>
+              </div>
+            )}
           </div>
-        ) : null}
-      </div>
 
-      {cameraError ? (
-        <p className="rounded-lg bg-danger/15 px-4 py-2 text-center text-sm text-danger">
-          {cameraError}
-        </p>
-      ) : null}
+          {cameraError ? (
+            <p className="rounded-xl bg-danger/15 px-4 py-2 text-center text-sm text-danger">
+              {cameraError}
+            </p>
+          ) : null}
 
-      {/* Resultat */}
-      {status === 'paused' && lastResult ? (
-        <ScanResultBanner result={lastResult} />
-      ) : null}
+          {status === 'paused' && lastResult ? (
+            <ScanResultBanner result={lastResult} />
+          ) : null}
 
-      {/* Controles */}
-      {status === 'scanning' ? (
-        <p className="text-center text-sm text-text-secondary">
-          Vise le QR du badge...
-        </p>
+          {status === 'scanning' ? (
+            <p className="text-center text-sm text-text-secondary">
+              Vise le QR du badge...
+            </p>
+          ) : (
+            <Button type="button" onClick={() => void beginCamera()}>
+              <ScanLine className="size-4" aria-hidden />
+              <span className="ml-2">
+                {status === 'paused'
+                  ? 'Scanner le suivant'
+                  : 'Demarrer le scan'}
+              </span>
+            </Button>
+          )}
+        </>
       ) : (
-        <Button type="button" onClick={() => void begin()}>
-          <ScanLine className="size-4" aria-hidden />
-          <span className="ml-2">
-            {status === 'paused' ? 'Scanner le suivant' : 'Demarrer le scan'}
-          </span>
-        </Button>
+        <>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={decoding}
+            className={cn(
+              'flex w-full flex-col items-center gap-3 rounded-2xl bg-surface-1 p-8 text-center',
+              'transition-colors hover:bg-surface-2 disabled:opacity-50',
+            )}
+          >
+            <ImageUp className="size-8 text-accent-violet" aria-hidden />
+            <span className="text-sm font-medium text-text-primary">
+              {decoding ? 'Lecture en cours...' : 'Choisir une image du badge'}
+            </span>
+            <span className="text-xs text-text-secondary">
+              PNG ou JPG contenant le QR code
+            </span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void handleFile(file)
+              e.target.value = '' // permet de re-selectionner le meme fichier
+            }}
+          />
+
+          {uploadError ? (
+            <p className="rounded-xl bg-danger/15 px-4 py-2 text-center text-sm text-danger">
+              {uploadError}
+            </p>
+          ) : null}
+
+          {status === 'paused' && lastResult ? (
+            <ScanResultBanner result={lastResult} />
+          ) : null}
+        </>
       )}
     </div>
+  )
+}
+
+// ===========================================================================
+// Helpers de decodage (client)
+// ===========================================================================
+
+function decodeFromVideo(
+  video: HTMLVideoElement | null,
+  canvas: HTMLCanvasElement | null,
+): string | null {
+  if (!video || !canvas) return null
+  if (video.readyState < 2 || video.videoWidth === 0) return null
+
+  const scale = Math.min(1, CAMERA_MAX_WIDTH / video.videoWidth)
+  const w = Math.round(video.videoWidth * scale)
+  const h = Math.round(video.videoHeight * scale)
+  canvas.width = w
+  canvas.height = h
+
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) return null
+  ctx.drawImage(video, 0, 0, w, h)
+  const data = ctx.getImageData(0, 0, w, h)
+  const code = jsQR(data.data, data.width, data.height, {
+    inversionAttempts: 'dontInvert',
+  })
+  return code?.data ?? null
+}
+
+async function decodeFromImageFile(file: File): Promise<string | null> {
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new Image()
+    img.src = url
+    await img.decode()
+
+    const scale = Math.min(
+      1,
+      IMAGE_MAX_DIM / Math.max(img.naturalWidth, img.naturalHeight),
+    )
+    const w = Math.round(img.naturalWidth * scale)
+    const h = Math.round(img.naturalHeight * scale)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    if (!ctx) return null
+    ctx.drawImage(img, 0, 0, w, h)
+    const data = ctx.getImageData(0, 0, w, h)
+    const code = jsQR(data.data, data.width, data.height, {
+      inversionAttempts: 'attemptBoth',
+    })
+    return code?.data ?? null
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+// ===========================================================================
+// Bouton de mode (style aligne sur ComposeMessageForm)
+// ===========================================================================
+function ModeButton({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+        active
+          ? 'bg-accent-violet/15 text-accent-violet'
+          : 'bg-surface-2 text-text-secondary hover:text-text-primary',
+      )}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   )
 }

@@ -33,7 +33,7 @@ export default function Error({
       <button
         type="button"
         onClick={() => reset()}
-        className="inline-flex min-h-[48px] items-center gap-2 rounded-md bg-accent-violet px-6 font-semibold text-text-on-accent active:scale-[0.98]"
+        className="inline-flex min-h-12 items-center gap-2 rounded-md bg-accent-violet px-6 font-semibold text-text-on-accent active:scale-[0.98]"
       >
         <RotateCcw className="size-4" aria-hidden />
         Réessayer

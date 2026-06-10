@@ -169,3 +169,41 @@ export async function getLatestPaymentForRegistration(
     rejection_reason: data.rejection_reason,
   }
 }
+
+/**
+ * Résumé d'un paiement, exposé au JOUEUR (jamais internal_note ni verified_by).
+ */
+export interface PlayerPaymentSummary {
+  id: string
+  method: string
+  amount_fcfa: number
+  status: string
+  rejection_reason: string | null
+  transaction_ref: string | null
+  submitted_at: string
+}
+
+/**
+ * Liste TOUS les paiements du joueur pour une réservation (historique),
+ * du plus récent au plus ancien. Champs publics joueur uniquement.
+ */
+export async function listPaymentsForRegistration(
+  playerId: string,
+  registrationId: string,
+): Promise<PlayerPaymentSummary[]> {
+  const supabase = createServiceRoleClient()
+  const { data, error } = await supabase
+    .from('payments')
+    .select(
+      'id, method, amount_fcfa, status, rejection_reason, transaction_ref, submitted_at',
+    )
+    .eq('registration_id', registrationId)
+    .eq('player_id', playerId)
+    .order('submitted_at', { ascending: false })
+
+  if (error) {
+    console.error('[listPaymentsForRegistration]', error.message)
+    return []
+  }
+  return (data ?? []) as PlayerPaymentSummary[]
+}

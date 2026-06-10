@@ -1,12 +1,7 @@
 /**
- * Page liste des éditions (M03.D).
- *
- * Page principale d'entrée pour la gestion des saisons + tournois Hors Saison
- * + Grandes Finales depuis l'admin.
- *
- * Server Component : charge `listEditions()` côté serveur, transmet à la table.
- * Permission : tout admin connecté (la garde est portée par (protected)/layout.tsx).
- * Mais les CTA "Nouvelle..." ne s'affichent que pour SUPER_ADMIN.
+ * Liste des éditions (M03.D) — refonte présentationnelle.
+ * Server Component : charge listEditions(). Garde portée par (protected)/layout.
+ * CTA "Nouvelle…" réservés au SUPER_ADMIN.
  */
 import { CalendarPlus, ListPlus } from 'lucide-react'
 import Link from 'next/link'
@@ -33,25 +28,25 @@ export default async function EditionsPage() {
 
   return (
     <div className="space-y-6">
-      {/* ─── En-tête ─────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Éditions</h1>
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-text-primary md:text-3xl">
+            Éditions & Saisons
+          </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Toutes les saisons et tournois Hors Saison, du plus récent au plus
-            ancien.
+            Vue globale du calendrier des tournois et gestion des saisons.
           </p>
         </div>
 
         {isSuperAdmin && (
-          <div className="flex items-center gap-2 shrink-0">
-            <Button asChild variant="outline" size="sm">
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button asChild variant="outline" size="sm" className="uppercase">
               <Link href={ROUTES.admin.editions.newOffSeason}>
                 <CalendarPlus aria-hidden />
                 Nouvelle Hors Saison
               </Link>
             </Button>
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="uppercase">
               <Link href={ROUTES.admin.editions.newSeason}>
                 <ListPlus aria-hidden />
                 Nouvelle Saison
@@ -61,7 +56,6 @@ export default async function EditionsPage() {
         )}
       </header>
 
-      {/* ─── Table ──────────────────────────────────────────────────── */}
       <EditionsTable editions={editions} canCreate={isSuperAdmin} />
     </div>
   )

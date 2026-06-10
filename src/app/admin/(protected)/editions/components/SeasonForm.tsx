@@ -102,7 +102,7 @@ export function SeasonForm() {
         className="space-y-6"
         noValidate
       >
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Informations de la saison</CardTitle>
             <CardDescription>
@@ -118,7 +118,7 @@ export function SeasonForm() {
                 <FormItem className="md:col-span-2">
                   <FormLabel>Nom de la saison</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex : Saison Inaugurale 2026" {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" placeholder="Ex : Saison Inaugurale 2026" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,13 +133,16 @@ export function SeasonForm() {
                 <FormItem>
                   <FormLabel>Numéro de saison</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="number"
                       min={1}
                       max={999}
                       step={1}
                       value={(field.value as number | string | undefined) ?? ''}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      onChange={(e) => {
+                        const v = e.target.valueAsNumber
+                        field.onChange(Number.isNaN(v) ? undefined : v)
+                      }}
                       onBlur={field.onBlur}
                       name={field.name}
                       ref={field.ref}
@@ -159,13 +162,16 @@ export function SeasonForm() {
                 <FormItem>
                   <FormLabel>Tournois prévus</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="number"
                       min={1}
                       max={52}
                       step={1}
                       value={(field.value as number | string | undefined) ?? ''}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      onChange={(e) => {
+                        const v = e.target.valueAsNumber
+                        field.onChange(Number.isNaN(v) ? undefined : v)
+                      }}
                       onBlur={field.onBlur}
                       name={field.name}
                       ref={field.ref}
@@ -187,7 +193,7 @@ export function SeasonForm() {
                 <FormItem>
                   <FormLabel>Date de début</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -202,7 +208,7 @@ export function SeasonForm() {
                 <FormItem>
                   <FormLabel>Date de fin</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -217,13 +223,16 @@ export function SeasonForm() {
                 <FormItem className="md:col-span-2">
                   <FormLabel>Seuil de qualification (points)</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="number"
                       min={1}
                       max={100000}
                       step={1}
                       value={(field.value as number | string | undefined) ?? ''}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      onChange={(e) => {
+                        const v = e.target.valueAsNumber
+                        field.onChange(Number.isNaN(v) ? undefined : v)
+                      }}
                       onBlur={field.onBlur}
                       name={field.name}
                       ref={field.ref}
@@ -246,7 +255,7 @@ export function SeasonForm() {
                 <FormItem className="md:col-span-2">
                   <FormLabel>Description (facultatif)</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       placeholder="Quelques mots sur cette saison…"
                       {...field}
                       value={field.value ?? ''}

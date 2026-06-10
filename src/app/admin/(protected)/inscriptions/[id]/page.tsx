@@ -1,8 +1,3 @@
-import { notFound } from 'next/navigation'
-
-export default function Page() {
-  notFound()
-}
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'

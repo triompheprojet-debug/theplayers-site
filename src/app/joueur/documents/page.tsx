@@ -1,5 +1,8 @@
+import { AlertTriangle, FileText } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ROUTES } from '@/config/routes'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
 
@@ -10,16 +13,12 @@ export const metadata = {
 }
 
 export default async function PlayerDocumentsPage() {
-  // 1. Auth joueur
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/connexion')
+  if (!user) redirect(ROUTES.signIn)
 
-  // 2. Documents valides du joueur (archive personnelle, tous tournois).
-  //    Lecture service_role strictement filtrée sur user.id → les jointures
-  //    (tournoi, badge) résolvent sans dépendre de la RLS de lecture croisée.
   const admin = createServiceRoleClient()
   const { data, error } = await admin
     .from('documents')
@@ -48,28 +47,47 @@ export default async function PlayerDocumentsPage() {
     }
   })
 
-  return (
-    <div className="flex min-h-screen flex-col pb-20">
-      <header className="bg-surface-1 px-4 py-6">
-        <h1 className="text-2xl font-bold">Mes documents</h1>
-        <p className="text-text-secondary mt-1 text-sm">
-          {'Reçus et badges de vos inscriptions confirmées.'}
-        </p>
-      </header>
+  // Aucun document → état vide centré (icône + message)
+  if (docs.length === 0) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center px-4">
+        <EmptyState
+          icon={FileText}
+          title="Aucun document pour l'instant"
+          description="Tes reçus et badges apparaîtront ici une fois ton paiement confirmé par l'organisation."
+        />
+      </div>
+    )
+  }
 
-      <main className="flex-1 space-y-3 px-4 py-6">
-        {docs.length === 0 ? (
-          <div className="bg-surface-1 rounded-2xl p-6 text-center">
-            <p className="text-text-secondary">
-              {
-                'Vos reçus et badges apparaîtront ici après confirmation de votre paiement.'
-              }
-            </p>
-          </div>
-        ) : (
-          docs.map((doc) => <DocumentCard key={doc.id} doc={doc} />)
-        )}
-      </main>
+  return (
+    <div className="pb-6">
+      <div className="flex items-center justify-center gap-2 bg-warning/10 px-4 py-3 text-warning">
+        <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+        <p className="text-center text-xs font-bold uppercase tracking-wider">
+          Imprime tes documents avant le jour J
+        </p>
+      </div>
+
+      <div className="space-y-6 px-4 pt-6">
+        <header className="space-y-1">
+          <h1 className="text-2xl font-bold text-accent-violet">Mes documents</h1>
+          <p className="text-sm text-text-secondary">
+            {'Reçus et badges de tes inscriptions confirmées.'}
+          </p>
+        </header>
+
+        <div className="space-y-3">
+          {docs.map((doc) => (
+            <DocumentCard key={doc.id} doc={doc} />
+          ))}
+        </div>
+
+        {/*
+          NON codé (noté) : « Bracket » → M14 ; « Règlement officiel » → pas de
+          document `rules` (pages légales) ; QR inline → uniquement dans le PDF.
+        */}
+      </div>
     </div>
   )
 }

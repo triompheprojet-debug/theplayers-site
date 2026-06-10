@@ -1,6 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import type { z } from 'zod'
@@ -28,6 +30,10 @@ const EMPTY: FormValues = {
   confirmPassword: '',
 }
 
+const LABEL_CLS = 'text-xs font-bold uppercase tracking-wider text-text-secondary'
+const INPUT_CLS =
+  'h-12 border-0 bg-background pr-12 dark:bg-background focus-visible:ring-2 focus-visible:ring-accent-violet'
+
 /**
  * Changement de mot de passe.
  * Le mot de passe actuel est re-vérifié côté serveur avant tout changement.
@@ -37,6 +43,10 @@ export function PasswordSection() {
     resolver: zodResolver(passwordChangeSchema),
     defaultValues: EMPTY,
   })
+
+  const [showCurrent, setShowCurrent] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const isSubmitting = form.formState.isSubmitting
 
@@ -67,15 +77,31 @@ export function PasswordSection() {
           name="currentPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe actuel</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  className="h-12"
-                  type="password"
-                  autoComplete="current-password"
-                />
-              </FormControl>
+              <FormLabel className={LABEL_CLS}>Ancien mot de passe</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input
+                    {...field}
+                    className={INPUT_CLS}
+                    type={showCurrent ? 'text' : 'password'}
+                    autoComplete="current-password"
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowCurrent((v) => !v)}
+                  aria-label={
+                    showCurrent ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                  }
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-md text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet"
+                >
+                  {showCurrent ? (
+                    <EyeOff className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -86,16 +112,32 @@ export function PasswordSection() {
           name="newPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nouveau mot de passe</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  className="h-12"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="8 caractères minimum"
-                />
-              </FormControl>
+              <FormLabel className={LABEL_CLS}>Nouveau mot de passe</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input
+                    {...field}
+                    className={INPUT_CLS}
+                    type={showNew ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    placeholder="8 caractères minimum"
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowNew((v) => !v)}
+                  aria-label={
+                    showNew ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                  }
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-md text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet"
+                >
+                  {showNew ? (
+                    <EyeOff className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -106,15 +148,33 @@ export function PasswordSection() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirmer le nouveau mot de passe</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  className="h-12"
-                  type="password"
-                  autoComplete="new-password"
-                />
-              </FormControl>
+              <FormLabel className={LABEL_CLS}>
+                Confirmer le nouveau mot de passe
+              </FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input
+                    {...field}
+                    className={INPUT_CLS}
+                    type={showConfirm ? 'text' : 'password'}
+                    autoComplete="new-password"
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={
+                    showConfirm ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                  }
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-md text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-violet"
+                >
+                  {showConfirm ? (
+                    <EyeOff className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}

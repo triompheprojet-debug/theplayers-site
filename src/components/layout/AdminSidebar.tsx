@@ -1,17 +1,10 @@
 'use client'
 
 /**
- * Sidebar admin desktop-first (M03.B).
- *
- * - Largeur fixe 264px, fixed left-0.
- * - Structure pilotée par @/config/navigation (ADMIN_NAV).
- * - Highlight de la route active via usePathname.
- * - Filtrage des items `superAdminOnly` selon le rôle reçu en prop.
- * - Profil admin sticky en bas (username + badge rôle + bouton déconnexion).
- *
- * La déconnexion pointe vers la Route Handler existante /admin/logout
- * (créée en M02). Méthode POST par convention (mutation d'état).
- * Si la Route Handler M02 répond uniquement à GET, retirer `method="post"`.
+ * Sidebar admin desktop-first (refonte présentationnelle).
+ * Structure pilotée par @/config/navigation (ADMIN_NAV), highlight via usePathname,
+ * filtrage `superAdminOnly` selon le rôle. Déconnexion = POST /admin/logout (M02).
+ * Accent actif = rouge admin (barre flux à gauche + fond + texte).
  */
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -25,6 +18,7 @@ import {
   Inbox,
   LayoutDashboard,
   List,
+  LogOut,
   type LucideIcon,
   Mail,
   QrCode,
@@ -50,9 +44,7 @@ interface AdminSidebarProps {
   role: AdminRole
 }
 
-// ---------------------------------------------------------------------------
-// Résolution string → composant Lucide (icônes utilisées dans ADMIN_NAV)
-// ---------------------------------------------------------------------------
+// Résolution string → composant Lucide (clés utilisées dans ADMIN_NAV)
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
   Trophy,
@@ -73,19 +65,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Shield,
 }
 
-// ---------------------------------------------------------------------------
-// Étiquettes des rôles (en français, badge)
-// ---------------------------------------------------------------------------
 const ROLE_LABEL: Record<AdminRole, string> = {
   super_admin: 'Super Admin',
   admin: 'Admin',
   referee: 'Arbitre',
-}
-
-const ROLE_CLASSES: Record<AdminRole, string> = {
-  super_admin: 'bg-accent-violet/20 text-accent-violet',
-  admin: 'bg-surface-2 text-text-secondary',
-  referee: 'bg-surface-2 text-text-secondary',
 }
 
 // ===========================================================================
@@ -99,22 +82,36 @@ export function AdminSidebar({ username, role }: AdminSidebarProps) {
       className={cn(
         'fixed inset-y-0 left-0 z-20 w-66',
         'flex flex-col',
-        'bg-surface-1 border-r border-border',
-        'pt-0.5', 
+        'bg-surface-1 pt-0.5',
       )}
     >
-      {/* ─── Logo / en-tête ──────────────────────────────────────────── */}
-      <div className="flex items-center px-6 py-5 border-b border-border">
-        <Link href={ROUTES.admin.dashboard} aria-label="Tableau de bord">
-          <BrandLogo variant="default" withText />
-        </Link>
+      {/* ─── Pavé de marque ──────────────────────────────────────────── */}
+      <div className="px-6 py-5">
+        <div className="flex items-start justify-between gap-2">
+          <Link
+            href={ROUTES.admin.dashboard}
+            aria-label="Tableau de bord"
+            className="min-w-0"
+          >
+            <BrandLogo variant="default" />
+          </Link>
+          <span
+            className={cn(
+              'shrink-0 rounded-md bg-admin px-2 py-0.5',
+              'text-[10px] font-bold uppercase tracking-wider text-white',
+              'shadow-[0_0_12px_rgba(220,38,38,0.45)]',
+            )}
+          >
+            Admin
+          </span>
+        </div>
+        <p className="mt-2 text-[10px] uppercase tracking-widest font-semibold text-text-muted">
+          Admin Panel
+        </p>
       </div>
 
       {/* ─── Navigation scrollable ───────────────────────────────────── */}
-      <nav
-        className="flex-1 overflow-y-auto px-3 py-4"
-        aria-label="Navigation admin"
-      >
+      <nav className="flex-1 overflow-y-auto py-2" aria-label="Navigation admin">
         {ADMIN_NAV.map((section) => (
           <SidebarSection
             key={section.label}
@@ -125,47 +122,46 @@ export function AdminSidebar({ username, role }: AdminSidebarProps) {
         ))}
       </nav>
 
-      {/* ─── Profil sticky bottom ────────────────────────────────────── */}
-      <div className="border-t border-border px-4 py-4">
-        <div className="mb-3">
-          <p className="text-sm font-semibold text-text-primary truncate">
-            {username}
-          </p>
-          <span
-            className={cn(
-              'inline-block mt-1 px-2 py-0.5 rounded-full',
-              'text-[10px] uppercase tracking-wider font-semibold',
-              ROLE_CLASSES[role],
-            )}
-          >
-            {ROLE_LABEL[role]}
-          </span>
-        </div>
+      {/* ─── Profil sticky bottom (séparation par ton de surface) ────── */}
+      <div className="mt-auto bg-surface-2/40 px-4 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-3 text-text-secondary">
+              <Shield className="size-4" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-text-primary">
+                {username}
+              </p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-text-muted">
+                {ROLE_LABEL[role]}
+              </p>
+            </div>
+          </div>
 
-        {/*
-          Déconnexion → POST sur /admin/logout (Route Handler M02).
-          Si M02 utilise GET, remplacer par : <Link href="/admin/logout">…</Link>
-        */}
-        <form action="/admin/logout" method="post">
-          <button
-            type="submit"
-            className={cn(
-              'w-full px-3 py-2 rounded-md',
-              'text-sm font-medium text-text-secondary',
-              'hover:bg-surface-2 hover:text-text-primary transition-colors',
-              'border border-border',
-            )}
-          >
-            Déconnexion
-          </button>
-        </form>
+          {/* Déconnexion → POST /admin/logout (Route Handler M02). */}
+          <form action="/admin/logout" method="get">
+            <button
+              type="submit"
+              aria-label="Déconnexion"
+              title="Déconnexion"
+              className={cn(
+                'inline-flex size-9 items-center justify-center rounded-md',
+                'text-text-secondary transition-colors',
+                'hover:bg-surface-3 hover:text-admin',
+              )}
+            >
+              <LogOut className="size-4" aria-hidden />
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   )
 }
 
 // ===========================================================================
-// Section de la sidebar
+// Section
 // ===========================================================================
 interface SidebarSectionProps {
   section: AdminNavSection
@@ -174,23 +170,15 @@ interface SidebarSectionProps {
 }
 
 function SidebarSection({ section, currentPath, role }: SidebarSectionProps) {
-  // Filtrer les items selon le rôle
   const visibleItems = section.items.filter(
     (item) => !item.superAdminOnly || role === 'super_admin',
   )
 
-  // Si la section devient vide après filtrage, on la masque
   if (visibleItems.length === 0) return null
 
   return (
     <div className="mb-5">
-      <h3
-        className={cn(
-          'px-3 mb-1.5',
-          'text-[10px] uppercase tracking-wider font-semibold',
-          'text-text-secondary',
-        )}
-      >
+      <h3 className="px-4 mb-1.5 text-[10px] uppercase tracking-wider font-semibold text-text-muted">
         {section.label}
       </h3>
       <ul className="space-y-0.5">
@@ -205,7 +193,7 @@ function SidebarSection({ section, currentPath, role }: SidebarSectionProps) {
 }
 
 // ===========================================================================
-// Lien individuel
+// Lien individuel — actif = barre flux rouge + fond + texte admin
 // ===========================================================================
 interface SidebarLinkProps {
   item: NavItem
@@ -215,21 +203,20 @@ interface SidebarLinkProps {
 function SidebarLink({ item, currentPath }: SidebarLinkProps) {
   const Icon = item.icon ? ICON_MAP[item.icon] : null
 
-  // Active si exact match ou si le path courant commence par item.href + '/'
   const isActive =
     currentPath === item.href || currentPath.startsWith(`${item.href}/`)
 
   return (
     <Link
       href={item.href}
+      aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-md',
+        'relative flex items-center gap-3 px-4 py-2.5',
         'text-sm font-medium transition-colors',
         isActive
-          ? 'bg-accent-violet/15 text-accent-violet'
+          ? "text-admin bg-admin/10 before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-r-full before:bg-admin before:shadow-[0_0_10px_rgba(220,38,38,0.6)] before:content-['']"
           : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary',
       )}
-      aria-current={isActive ? 'page' : undefined}
     >
       {Icon ? <Icon className="size-4 shrink-0" aria-hidden /> : null}
       <span className="truncate">{item.label}</span>

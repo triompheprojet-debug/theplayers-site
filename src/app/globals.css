@@ -48,7 +48,7 @@
 
   /* Polices */
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, monospace;
 
   /* Lueurs signature */
   --shadow-glow-violet: 0 0 24px rgb(139 92 246 / 0.4);

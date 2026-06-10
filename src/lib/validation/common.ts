@@ -33,15 +33,17 @@ export const pseudoSchema = z
 // ---------------------------------------------------------------------------
 
 /**
- * Numéro congolais — accepte plusieurs formats en entrée (06..., +24206..., 24206...)
- * et le normalise systématiquement en E.164 (+242XXXXXXXXX) après validation.
+ * Numéro congolais mobile (MTN 06 / Airtel 05 ou 04).
+ * Accepte plusieurs formats en entrée (06..., 05..., 04..., +24206..., 24206...)
+ * et le normalise systématiquement en E.164 (+242XXXXXXXXX, 0 conservé) après
+ * validation. Le 0 national congolais est TOUJOURS conservé (spécificité +242).
  */
 export const phoneSchema = z
   .string({ error: 'Le numéro de téléphone est obligatoire.' })
   .trim()
   .refine(isValidCongolesePhone, {
     error:
-      'Numéro de téléphone invalide. Format attendu : +242 06 XX XX XX XX (9 chiffres après l\'indicatif).',
+      'Numéro invalide. Format attendu : 06 / 05 / 04 suivi de 7 chiffres (ex. 06 123 45 67).',
   })
   .transform((val) => normalizePhone(val)!)
 
@@ -148,7 +150,7 @@ export function parseFormData<T extends z.ZodTypeAny>(
   formData: FormData,
   schema: T,
 ) {
-  
+
   const obj: Record<string, unknown> = {}
   formData.forEach((value, key) => {
     obj[key] = value

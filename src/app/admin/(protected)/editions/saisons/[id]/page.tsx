@@ -1,25 +1,14 @@
 /**
- * Page détail d'une saison (M03.G).
- *
- * - Affiche les infos de la saison + ses tournois enfants.
- * - CTA SUPER_ADMIN : "Ajouter un tournoi" et "Créer la Grande Finale"
- *   (cette dernière masquée si une GF existe déjà).
- * - notFound() si la saison n'existe pas.
+ * Détail d'une saison (M03.G) — refonte présentationnelle.
+ * Infos saison + tournois enfants. CTA SUPER_ADMIN (ajout tournoi / Grande
+ * Finale, masquée si déjà créée). notFound() si la saison n'existe pas.
  */
 import { CalendarPlus, ChevronLeft, Crown } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { DateBadge } from '@/components/shared/DateBadge'
+import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/config/routes'
 import { requireAdmin } from '@/lib/auth/permissions'
 import { getSeasonById } from '@/lib/seasons/get'
@@ -27,12 +16,19 @@ import {
   hasGrandFinal,
   listTournamentsBySeason,
 } from '@/lib/tournaments/list-by-season'
+import { cn } from '@/lib/utils'
 
 import { SeasonTournamentsTable } from '../../components/SeasonTournamentsTable'
 
 export const metadata = {
   title: 'Détail de la saison — Administration',
   robots: { index: false, follow: false },
+}
+
+const SEASON_STATUS: Record<string, { label: string; className: string }> = {
+  active: { label: 'Active', className: 'bg-accent-violet/15 text-accent-violet' },
+  completed: { label: 'Terminée', className: 'bg-surface-2 text-text-muted' },
+  archived: { label: 'Archivée', className: 'bg-surface-2 text-text-muted' },
 }
 
 export default async function SeasonDetailPage({
@@ -54,15 +50,16 @@ export default async function SeasonDetailPage({
 
   const isSuperAdmin = session.role === 'super_admin'
   const grandFinalExists = hasGrandFinal(tournaments)
-  const seasonStatusLabel: Record<string, string> = {
-    active: 'Active',
-    completed: 'Terminée',
-    archived: 'Archivée',
+  const seasonTournamentCount = tournaments.filter(
+    (t) => t.tournament_type === 'season',
+  ).length
+  const status = SEASON_STATUS[season.status] ?? {
+    label: season.status,
+    className: 'bg-surface-2 text-text-secondary',
   }
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      {/* ─── Fil d'Ariane ────────────────────────────────────────────── */}
+    <div className="max-w-5xl space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-3">
         <Link href={ROUTES.admin.editions.root}>
           <ChevronLeft aria-hidden />
@@ -71,60 +68,70 @@ export default async function SeasonDetailPage({
       </Button>
 
       {/* ─── En-tête saison ──────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="uppercase tracking-wider text-[10px]">
-                  Saison {season.season_number}
-                </Badge>
-                <Badge variant="outline">
-                  {seasonStatusLabel[season.status] ?? season.status}
-                </Badge>
-              </div>
-              <CardTitle className="text-xl">{season.name}</CardTitle>
-              {season.description && (
-                <CardDescription>{season.description}</CardDescription>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3 text-sm">
+      <section className="rounded-2xl bg-surface-1 p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-md bg-surface-2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+            Saison {season.season_number}
+          </span>
+          <span
+            className={cn(
+              'rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+              status.className,
+            )}
+          >
+            {status.label}
+          </span>
+        </div>
+
+        <h1 className="mt-3 text-2xl font-bold text-text-primary">
+          {season.name}
+        </h1>
+        {season.description && (
+          <p className="mt-1 text-sm text-text-secondary">
+            {season.description}
+          </p>
+        )}
+
+        <div className="mt-5 grid gap-4 rounded-xl bg-surface-2/40 p-4 text-sm md:grid-cols-3">
           <InfoBlock label="Période">
-            <DateBadge from={season.start_date} to={season.end_date} />
+            <DateBadge
+              from={season.start_date}
+              to={season.end_date}
+              className="text-text-primary"
+            />
           </InfoBlock>
           <InfoBlock label="Tournois prévus">
-            <span className="tabular-nums">
-              {tournaments.filter((t) => t.tournament_type === 'season').length}{' '}
-              / {season.expected_tournaments}
+            <span className="font-mono tabular-nums text-text-primary">
+              {seasonTournamentCount} / {season.expected_tournaments}
             </span>
           </InfoBlock>
           <InfoBlock label="Seuil de qualification">
-            <span className="tabular-nums">
+            <span className="font-mono tabular-nums text-text-primary">
               {season.qualification_threshold} pts
             </span>
           </InfoBlock>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* ─── Section tournois ────────────────────────────────────────── */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <h2 className="text-lg font-semibold text-text-primary">
             Tournois de la saison
           </h2>
 
           {isSuperAdmin && (
-            <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href={ROUTES.admin.editions.newSeasonTournament(season.id)}>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <Button asChild variant="outline" size="sm" className="uppercase">
+                <Link
+                  href={ROUTES.admin.editions.newSeasonTournament(season.id)}
+                >
                   <CalendarPlus aria-hidden />
                   Ajouter un tournoi
                 </Link>
               </Button>
               {!grandFinalExists && (
-                <Button asChild size="sm">
+                <Button asChild size="sm" className="uppercase">
                   <Link href={ROUTES.admin.editions.newGrandFinal(season.id)}>
                     <Crown aria-hidden />
                     Créer la Grande Finale

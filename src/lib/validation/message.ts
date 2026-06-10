@@ -47,3 +47,17 @@ export const replySchema = z.object({
   body: bodySchema,
 })
 export type ReplyInput = z.infer<typeof replySchema>
+
+/** Modification d'un message admin deja envoye (P3). */
+export const editMessageSchema = z.object({
+  messageId: z.string().uuid('Message invalide'),
+  subject: subjectSchema,
+  body: bodySchema,
+})
+export type EditMessageInput = z.infer<typeof editMessageSchema>
+
+/** Suppression douce d'un message admin (P3). */
+export const deleteMessageSchema = z.object({
+  messageId: z.string().uuid('Message invalide'),
+})
+export type DeleteMessageInput = z.infer<typeof deleteMessageSchema>

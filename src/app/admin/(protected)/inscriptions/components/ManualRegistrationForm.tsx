@@ -60,16 +60,19 @@ export function ManualRegistrationForm() {
   useEffect(() => {
     if (mode !== 'existing') return
     const term = query.trim()
-    if (term.length < 2) {
-      setResults([])
-      return
-    }
-    setSearching(true)
+
     const timer = setTimeout(async () => {
+      if (term.length < 2) {
+        setResults([])
+        setSearching(false)
+        return
+      }
+      setSearching(true)
       const result = await searchPlayersAction(term)
       setSearching(false)
       if (result.success) setResults(result.data)
     }, 350)
+
     return () => clearTimeout(timer)
   }, [query, mode])
 

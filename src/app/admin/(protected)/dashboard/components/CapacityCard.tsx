@@ -1,15 +1,8 @@
-import { Users } from 'lucide-react'
-
 import { ConfidentialNotice } from '@/components/shared/ConfidentialNotice'
-import { Progress } from '@/components/ui/progress'
 
 /**
- * Carte de capacité du tournoi actif (M10).
- *
- * Règle 1 — la capacité est CONFIDENTIELLE : cette carte n'apparaît QUE dans
- * le back-office admin. Elle n'est jamais rendue côté public/joueur.
- *
- * `occupied` = inscriptions actives (reserved + awaiting_verification + confirmed).
+ * Capacité du tournoi actif (Règle 1 — confidentielle, back-office uniquement).
+ * Accent admin rouge + jauge orange. `occupied` = inscriptions actives.
  */
 interface CapacityCardProps {
   capacity: number | null
@@ -24,40 +17,45 @@ export function CapacityCard({ capacity, occupied }: CapacityCardProps) {
   const remaining = hasCapacity ? Math.max(0, capacity - occupied) : null
 
   return (
-    <section className="rounded-xl bg-surface-1 border border-border p-5 space-y-4">
-      <div className="flex items-center gap-2">
-        <Users className="size-4 text-accent-violet" aria-hidden />
-        <h2 className="text-sm font-semibold text-text-primary">
-          Capacité du tournoi
-        </h2>
-      </div>
+    <section className="relative overflow-hidden rounded-2xl bg-surface-1 p-5 before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-admin before:content-['']">
+      <ConfidentialNotice message="Capacité serveur — ne jamais communiquer publiquement (Règle 1)." />
 
       {hasCapacity ? (
-        <>
-          <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold tabular-nums text-text-primary">
-              {occupied}
-              <span className="text-base font-normal text-text-secondary">
-                {' '}
-                / {capacity}
-              </span>
+        <div className="mt-4 space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-text-secondary">
+              Capacité serveur
             </p>
-            <p className="text-sm text-text-secondary">
-              {remaining} place{remaining === 1 ? '' : 's'} restante
-              {remaining === 1 ? '' : 's'}
+            <p className="font-mono tabular-nums text-text-primary">
+              <span className="text-2xl font-bold">{occupied}</span>
+              <span className="text-text-secondary"> / {capacity}</span>
             </p>
           </div>
 
-          <Progress value={percent} aria-label="Taux de remplissage" />
-          <p className="text-xs text-text-secondary">{percent} % occupé</p>
-        </>
+          <div
+            role="progressbar"
+            aria-valuenow={percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Taux de remplissage"
+            className="h-2 w-full overflow-hidden rounded-full bg-surface-2"
+          >
+            <div
+              className="h-full rounded-full bg-warning"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+
+          <p className="text-xs text-text-secondary">
+            {percent} % occupé · {remaining} place{remaining === 1 ? '' : 's'}{' '}
+            restante{remaining === 1 ? '' : 's'}
+          </p>
+        </div>
       ) : (
-        <p className="text-sm text-text-secondary">
+        <p className="mt-4 text-sm text-text-secondary">
           Aucune capacité définie pour ce tournoi.
         </p>
       )}
-
-      <ConfidentialNotice message="Capacité confidentielle — ne jamais communiquer publiquement (Règle 1)." />
     </section>
   )
 }

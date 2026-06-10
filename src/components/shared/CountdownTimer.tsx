@@ -10,6 +10,8 @@ interface CountdownTimerProps {
   onExpire?: () => void
   /** Affiche les secondes (défaut : true si < 1h restante, sinon false) */
   showSeconds?: boolean
+  /** 'inline' (défaut) = chaîne compacte ; 'boxes' = 4 cases (hero) */
+  variant?: 'inline' | 'boxes'
   className?: string
 }
 
@@ -23,12 +25,23 @@ interface TimeLeft {
 
 // --- External store : tick "now" chaque seconde --------------------------
 
+// "now" mis en cache au niveau module.
+// CRITIQUE : getSnapshot DOIT renvoyer une valeur STABLE entre deux ticks.
+// Renvoyer Date.now() directement fait croire à React que le store change
+// à CHAQUE lecture (valeur différente à chaque milliseconde) → rendu en
+// boucle infinie ("Maximum update depth exceeded"). On ne rafraîchit le
+// cache QUE dans le tick de l'intervalle.
+let cachedNow = Date.now()
+
 function subscribe(callback: () => void): () => void {
-  const interval = setInterval(callback, 1000)
+  const interval = setInterval(() => {
+    cachedNow = Date.now()
+    callback()
+  }, 1000)
   return () => clearInterval(interval)
 }
 
-const getClientSnapshot = (): number => Date.now()
+const getClientSnapshot = (): number => cachedNow
 // Sentinelle 0 côté serveur (signal "pas encore monté")
 const getServerSnapshot = (): number => 0
 
@@ -52,6 +65,34 @@ function pad(n: number): string {
   return n.toString().padStart(2, '0')
 }
 
+// Rendu en cases (Jours / Heures / Min / Sec). No-Line, pas de glassmorphism
+// (réservé à la navigation) : tons de surface pleins.
+function Boxes({
+  cells,
+  className,
+}: {
+  cells: Array<{ value: string; label: string }>
+  className?: string
+}) {
+  return (
+    <div className={cn('flex items-stretch gap-2', className)} aria-live="polite">
+      {cells.map((cell) => (
+        <div
+          key={cell.label}
+          className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg bg-surface-1 px-2 py-3"
+        >
+          <span className="font-mono text-2xl font-bold tabular-nums text-text-primary">
+            {cell.value}
+          </span>
+          <span className="text-[10px] uppercase tracking-wider text-text-muted">
+            {cell.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // --- Component ------------------------------------------------------------
 
 /**
@@ -62,16 +103,14 @@ function pad(n: number): string {
  *  - SSR safe : sentinelle 0 côté serveur, vraie valeur côté client
  *  - Hydration safe : le mismatch est résolu naturellement par React
  *
- * Affichage adaptatif :
- *     > 1 jour     → "3j 14:25:08"
- *     < 1 jour     → "14:25:08"
- *     < 1 minute   → "00:00:08"
- *     expiré       → "Terminé"
+ * variant='inline' :  > 1j → "3j 14:25:08" / < 1j → "14:25:08" / expiré → "Terminé"
+ * variant='boxes'  :  4 cases Jours/Heures/Min/Sec (hero accueil)
  */
 export function CountdownTimer({
   targetDate,
   onExpire,
   showSeconds,
+  variant = 'inline',
   className,
 }: CountdownTimerProps) {
   // Conversion target → timestamp (pure)
@@ -103,6 +142,19 @@ export function CountdownTimer({
 
   // Placeholder côté serveur (nowMs === 0 = sentinelle)
   if (nowMs === 0) {
+    if (variant === 'boxes') {
+      return (
+        <Boxes
+          className={className}
+          cells={[
+            { value: '--', label: 'Jours' },
+            { value: '--', label: 'Heures' },
+            { value: '--', label: 'Min' },
+            { value: '--', label: 'Sec' },
+          ]}
+        />
+      )
+    }
     return (
       <span
         className={cn('font-mono tabular-nums text-text-muted', className)}
@@ -129,6 +181,21 @@ export function CountdownTimer({
   }
 
   const { days, hours, minutes, seconds } = timeLeft
+
+  if (variant === 'boxes') {
+    return (
+      <Boxes
+        className={className}
+        cells={[
+          { value: pad(days), label: 'Jours' },
+          { value: pad(hours), label: 'Heures' },
+          { value: pad(minutes), label: 'Min' },
+          { value: pad(seconds), label: 'Sec' },
+        ]}
+      />
+    )
+  }
+
   const showSecs = showSeconds ?? (days === 0 && hours === 0)
 
   return (

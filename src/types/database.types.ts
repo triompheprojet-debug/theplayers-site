@@ -280,7 +280,10 @@ export type Database = {
           body: string
           broadcast_scope: string | null
           created_at: string
+          deleted_at: string | null
+          edited_at: string | null
           id: string
+          is_deleted: boolean
           parent_message_id: string | null
           read_at: string | null
           recipient_player_id: string | null
@@ -297,7 +300,10 @@ export type Database = {
           body: string
           broadcast_scope?: string | null
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
+          is_deleted?: boolean
           parent_message_id?: string | null
           read_at?: string | null
           recipient_player_id?: string | null
@@ -314,7 +320,10 @@ export type Database = {
           body?: string
           broadcast_scope?: string | null
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
+          is_deleted?: boolean
           parent_message_id?: string | null
           read_at?: string | null
           recipient_player_id?: string | null

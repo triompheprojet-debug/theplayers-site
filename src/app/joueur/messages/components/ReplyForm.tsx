@@ -11,31 +11,37 @@ import type { ActionResult } from '@/types/api.types'
 
 interface ReplyFormProps {
   parentMessageId: string
-  /** Server Action passee par la page (evite un import a travers le segment [id]). */
+  /** Server Action passée par la page (évite un import à travers le segment [id]). */
   action: (input: {
     parentMessageId: string
     body: string
   }) => Promise<ActionResult<{ messageId: string }>>
+  /** Réponses encore disponibles (le serveur reste l'autorité). */
+  remaining?: number
 }
 
 /**
- * Formulaire de reponse joueur (mobile-first). Affiche uniquement si le message
- * autorise les reponses. Le serveur reste l'autorite (re-verification).
+ * Formulaire de réponse joueur (mobile-first). Affiché par la page uniquement si
+ * le message autorise les réponses ET qu'il reste du quota. Le serveur revérifie
+ * l'autorisation et le quota (la RLS + le trigger DB sont les barrières dures).
  */
-export function ReplyForm({ parentMessageId, action }: ReplyFormProps) {
+export function ReplyForm({ parentMessageId, action, remaining }: ReplyFormProps) {
   const [body, setBody] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const quotaReached = remaining !== undefined && remaining <= 0
+
   async function handleSubmit() {
+    if (quotaReached) return
     if (body.trim() === '') {
-      toast.error('Ecris ta reponse.')
+      toast.error('Écris ta réponse.')
       return
     }
     setSubmitting(true)
     try {
       const res = await action({ parentMessageId, body })
       if (res.success) {
-        toast.success('Reponse envoyee.')
+        toast.success('Réponse envoyée.')
         setBody('')
       } else {
         toast.error(res.error)
@@ -46,24 +52,34 @@ export function ReplyForm({ parentMessageId, action }: ReplyFormProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      {remaining !== undefined ? (
+        <p className="text-xs text-text-secondary">
+          {`Il te reste ${remaining} réponse${remaining > 1 ? 's' : ''} pour ce message.`}
+        </p>
+      ) : null}
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         maxLength={4000}
         rows={4}
-        disabled={submitting}
-        placeholder="Ta reponse"
+        disabled={submitting || quotaReached}
+        placeholder="Ta réponse"
         className={cn(
-          'w-full rounded-md border border-border bg-surface-2 px-3 py-2',
+          'w-full rounded-xl border-0 bg-surface-2 px-3 py-3',
           'text-sm text-text-primary placeholder:text-text-secondary',
-          'focus:outline-none focus:ring-2 focus:ring-accent-violet/50',
+          'focus:outline-none focus:ring-2 focus:ring-accent-violet',
           'disabled:opacity-50',
         )}
       />
-      <Button type="button" onClick={handleSubmit} disabled={submitting}>
-        <SendHorizontal className="size-4" aria-hidden />
-        <span className="ml-2">{submitting ? 'Envoi...' : 'Repondre'}</span>
+      <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={submitting || quotaReached}
+        className="min-h-12 w-full bg-accent-violet text-white hover:bg-accent-violet/90"
+      >
+        <SendHorizontal className="h-4 w-4" aria-hidden="true" />
+        {submitting ? 'Envoi…' : 'Répondre'}
       </Button>
     </div>
   )

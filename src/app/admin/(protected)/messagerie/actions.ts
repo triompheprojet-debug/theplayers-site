@@ -6,11 +6,16 @@ import { z } from 'zod'
 import { ROUTES } from '@/config/routes'
 import { requireAdminRole } from '@/lib/auth/permissions'
 import { broadcastMessage } from '@/lib/messaging/broadcast'
+import { editAdminMessage, softDeleteAdminMessage } from '@/lib/messaging/manage'
 import { sendMessage } from '@/lib/messaging/send'
 import {
   broadcastSchema,
+  deleteMessageSchema,
+  editMessageSchema,
   sendMessageSchema,
   type BroadcastInput,
+  type DeleteMessageInput,
+  type EditMessageInput,
   type SendMessageInput,
 } from '@/lib/validation/message'
 
@@ -86,10 +91,74 @@ export async function broadcastMessageAction(
         ? 'Aucun tournoi actif pour diffuser un message.'
         : result.reason === 'no_recipients'
           ? 'Aucun destinataire ne correspond a ce critere.'
-          : "La diffusion a echoue, reessaie."
+          : 'La diffusion a echoue, reessaie.'
     return actionError(message)
   }
 
   revalidatePath(ROUTES.admin.messaging.root)
   return actionSuccess({ recipientCount: result.recipientCount })
+}
+
+/**
+ * Modification d'un message admin deja envoye (P3). Le joueur verra le contenu
+ * mis a jour ; un marqueur `edited_at` est pose.
+ */
+export async function editMessageAction(
+  raw: EditMessageInput,
+): Promise<ActionResult<null>> {
+  const session = await requireAdminRole(MESSAGING_ROLES)
+
+  const parsed = editMessageSchema.safeParse(raw)
+  if (!parsed.success) {
+    return actionError('Donnees invalides', toFieldErrors(parsed.error))
+  }
+
+  const result = await editAdminMessage({
+    adminId: session.adminId,
+    messageId: parsed.data.messageId,
+    subject: parsed.data.subject,
+    body: parsed.data.body,
+  })
+
+  if (!result.ok) {
+    return actionError(
+      result.reason === 'not_found'
+        ? 'Message introuvable.'
+        : 'La modification a echoue, reessaie.',
+    )
+  }
+
+  revalidatePath(ROUTES.admin.messaging.root)
+  return actionSuccess(null)
+}
+
+/**
+ * Suppression DOUCE d'un message admin (P3). Disparait cote joueur, conserve en
+ * base pour l'audit.
+ */
+export async function deleteMessageAction(
+  raw: DeleteMessageInput,
+): Promise<ActionResult<null>> {
+  const session = await requireAdminRole(MESSAGING_ROLES)
+
+  const parsed = deleteMessageSchema.safeParse(raw)
+  if (!parsed.success) {
+    return actionError('Donnees invalides', toFieldErrors(parsed.error))
+  }
+
+  const result = await softDeleteAdminMessage({
+    adminId: session.adminId,
+    messageId: parsed.data.messageId,
+  })
+
+  if (!result.ok) {
+    return actionError(
+      result.reason === 'not_found'
+        ? 'Message introuvable.'
+        : 'La suppression a echoue, reessaie.',
+    )
+  }
+
+  revalidatePath(ROUTES.admin.messaging.root)
+  return actionSuccess(null)
 }

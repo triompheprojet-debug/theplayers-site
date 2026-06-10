@@ -25,7 +25,7 @@ export default async function NewSeasonPage() {
   await requireSuperAdmin()
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="mx-auto max-w-3xl space-y-6">
       {/* ─── En-tête ─────────────────────────────────────────────────── */}
       <header className="space-y-2">
         <Button asChild variant="ghost" size="sm" className="-ml-3">

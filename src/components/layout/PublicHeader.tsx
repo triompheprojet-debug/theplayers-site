@@ -1,14 +1,13 @@
 /**
- * Header public (M05).
+ * Header public — Server Component.
  *
- * - Server Component (aucune interactivité propre ; le drawer mobile est
- *   délégué à PublicMobileNav, Client).
- * - Sticky + glassmorphism (réservé à la navigation).
- * - Nav desktop (>= md), burger drawer (< md).
- * - CTA "S'inscrire" affiché uniquement si les inscriptions sont ouvertes
- *   (Règle : pas de CTA si fermé). Lien et libellés centralisés via ROUTES.
+ * - Sticky + glassmorphism (réservé à la navigation), lueur ambiante violette.
+ * - Brand : icône manette (Lucide) + wordmark BrandLogo (THE violet / PLAYERS blanc).
+ * - Nav desktop (>= md) ; drawer mobile délégué à PublicMobileNav (Client).
+ * - "Connexion" toujours visible ; "S'inscrire" uniquement si inscriptions ouvertes.
  * - No-Line, aucun emoji.
  */
+import { Gamepad2 } from 'lucide-react'
 import Link from 'next/link'
 
 import { BrandLogo } from '@/components/shared/BrandLogo'
@@ -19,9 +18,10 @@ import { cn } from '@/lib/utils'
 const NAV_LINKS = [
   { href: ROUTES.home, label: 'Accueil' },
   { href: ROUTES.tournament, label: 'Tournoi' },
-  { href: ROUTES.ranking, label: 'Classement' },
+  { href: ROUTES.eventTypes, label: "Types d'événements" },
   { href: ROUTES.bracket, label: 'Bracket' },
-  { href: ROUTES.eventTypes, label: 'Types d\u2019\u00e9v\u00e9nements' },
+  { href: ROUTES.ranking, label: 'Classement' },
+  { href: ROUTES.history, label: 'Historique' },
   { href: ROUTES.contact, label: 'Contact' },
 ]
 
@@ -31,9 +31,14 @@ interface PublicHeaderProps {
 
 export function PublicHeader({ registrationsOpen }: PublicHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 bg-background/85 shadow-ambient-violet backdrop-blur-lg">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
-        <Link href={ROUTES.home} aria-label="THE PLAYERS — accueil">
+        <Link
+          href={ROUTES.home}
+          aria-label="THE PLAYERS — accueil"
+          className="inline-flex items-center gap-2"
+        >
+          <Gamepad2 className="size-7 text-accent-violet" aria-hidden />
           <BrandLogo variant="small" />
         </Link>
 
@@ -57,17 +62,25 @@ export function PublicHeader({ registrationsOpen }: PublicHeaderProps) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href={ROUTES.signIn}
+            className="hidden h-12 items-center rounded-md px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-1 hover:text-text-primary md:inline-flex"
+          >
+            Connexion
+          </Link>
+
           {registrationsOpen && (
             <Link
               href={ROUTES.signUp}
-              className="hidden h-12 items-center justify-center rounded-md bg-accent-violet px-5 font-semibold text-text-on-accent transition-transform active:scale-[0.98] md:inline-flex"
+              className="hidden h-12 items-center justify-center rounded-md bg-accent-violet px-5 font-semibold text-text-on-accent transition-colors hover:bg-accent-violet-hover active:scale-[0.98] md:inline-flex"
             >
-              S&apos;inscrire
+              {"S'inscrire"}
             </Link>
           )}
 
           <PublicMobileNav
             links={NAV_LINKS}
+            signInHref={ROUTES.signIn}
             signUpHref={ROUTES.signUp}
             showSignUp={registrationsOpen}
           />

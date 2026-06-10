@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
 import { QueryProvider } from '@/components/providers/QueryProvider'
@@ -10,6 +10,12 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-jetbrains-mono',
 })
 
 export const metadata: Metadata = {
@@ -23,23 +29,10 @@ export const metadata: Metadata = {
   description:
     'Tournois de football virtuel à Pointe-Noire, République du Congo.',
   applicationName: 'THE PLAYERS',
-  formatDetection: {
-    telephone: false,
-    email: false,
-    address: false,
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'fr_CG',
-    siteName: 'THE PLAYERS',
-  },
-  twitter: {
-    card: 'summary_large_image',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  formatDetection: { telephone: false, email: false, address: false },
+  openGraph: { type: 'website', locale: 'fr_CG', siteName: 'THE PLAYERS' },
+  twitter: { card: 'summary_large_image' },
+  robots: { index: true, follow: true },
 }
 
 export const viewport: Viewport = {
@@ -56,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang="fr" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen bg-background text-text-primary antialiased">
         <QueryProvider>
           <SupabaseProvider>

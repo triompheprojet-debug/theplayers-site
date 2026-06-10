@@ -1,135 +1,53 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { Bell, CheckCheck } from 'lucide-react'
-import Link from 'next/link'
-import { useState } from 'react'
+import { NotificationBell } from '@/components/layout/NotificationBell'
+import { PlayerBottomNav } from '@/components/layout/PlayerBottomNav'
+import { PlayerHeaderMenu } from '@/components/layout/PlayerHeaderMenu'
+import { RealtimeProvider } from '@/components/providers/RealtimeProvider'
+import { createClient } from '@/lib/supabase/server'
 
-import { useNotifications } from '@/components/providers/RealtimeProvider'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
+export default async function PlayerLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  // Garde d'auth au niveau layout (en plus du middleware /joueur/*)
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/connexion')
 
-/**
- * Cloche de notifications (header joueur, mobile-first).
- * Badge compteur non-lus ; feuille du bas listant les notifications ;
- * un clic marque la notification lue et navigue vers `action_url`.
- */
-export function NotificationBell() {
-  const { items, unreadCount, markRead, markAllRead } = useNotifications()
-  const [open, setOpen] = useState(false)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('pseudo')
+    .eq('id', user.id)
+    .single()
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <button
-          type="button"
-          aria-label={
-            unreadCount > 0
-              ? `Notifications, ${unreadCount} non lues`
-              : 'Notifications'
-          }
-          className="relative flex size-11 items-center justify-center rounded-full text-text-secondary transition-colors hover:text-text-primary active:scale-95"
-        >
-          <Bell className="size-6" aria-hidden />
-          {unreadCount > 0 ? (
-            <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-accent-violet px-1 text-[10px] font-bold leading-4 text-white">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          ) : null}
-        </button>
-      </SheetTrigger>
-
-      <SheetContent side="bottom" className="max-h-[80dvh] overflow-y-auto">
-        <SheetHeader className="flex-row items-center justify-between">
-          <SheetTitle>Notifications</SheetTitle>
-          {unreadCount > 0 ? (
-            <button
-              type="button"
-              onClick={() => void markAllRead()}
-              className="inline-flex items-center gap-1 text-xs font-medium text-accent-violet"
-            >
-              <CheckCheck className="size-4" aria-hidden />
-              Tout marquer lu
-            </button>
-          ) : null}
-        </SheetHeader>
-
-        {items.length === 0 ? (
-          <p className="px-4 py-10 text-center text-sm text-text-secondary">
-            Aucune notification pour le moment.
+    <RealtimeProvider>
+      <div className="flex min-h-screen flex-col bg-background text-text-primary">
+        {/* Top-bar mobile : salutation (pseudo) + cloche + menu avatar */}
+        <header className="sticky top-0 z-40 flex items-center justify-between bg-surface-1/80 px-4 py-3 backdrop-blur-md">
+          <p className="text-base text-text-secondary">
+            Salut,{' '}
+            {profile?.pseudo ? (
+              <span className="font-bold text-text-primary">
+                {profile.pseudo}
+              </span>
+            ) : null}
           </p>
-        ) : (
-          <ul className="flex flex-col gap-2 px-4 py-4">
-            {items.map((n) => {
-              const unread = n.read_at === null
-              const content = (
-                <div
-                  className={cn(
-                    'rounded-lg border border-border p-3 transition-colors',
-                    unread ? 'bg-surface-2' : 'bg-surface-1',
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    {unread ? (
-                      <span
-                        className="size-2 shrink-0 rounded-full bg-accent-violet"
-                        aria-hidden
-                      />
-                    ) : null}
-                    <p
-                      className={cn(
-                        'truncate text-sm',
-                        unread
-                          ? 'font-semibold text-text-primary'
-                          : 'text-text-primary',
-                      )}
-                    >
-                      {n.title}
-                    </p>
-                  </div>
-                  {n.body ? (
-                    <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
-                      {n.body}
-                    </p>
-                  ) : null}
-                  <p className="mt-1 text-[11px] text-text-secondary">
-                    {new Date(n.created_at).toLocaleString('fr-FR')}
-                  </p>
-                </div>
-              )
 
-              return (
-                <li key={n.id}>
-                  {n.action_url ? (
-                    <Link
-                      href={n.action_url}
-                      onClick={() => {
-                        if (unread) void markRead(n.id)
-                        setOpen(false)
-                      }}
-                    >
-                      {content}
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      className="w-full text-left"
-                      onClick={() => unread && void markRead(n.id)}
-                    >
-                      {content}
-                    </button>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </SheetContent>
-    </Sheet>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <PlayerHeaderMenu />
+          </div>
+        </header>
+
+        <main className="flex-1 pb-20">{children}</main>
+
+        <PlayerBottomNav />
+      </div>
+    </RealtimeProvider>
   )
 }

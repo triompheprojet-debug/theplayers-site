@@ -13,14 +13,16 @@ export const metadata = {
 /**
  * Page de scan jour J. Accessible super_admin / admin / arbitre.
  * Le scan n'a de sens que sur le tournoi ACTIF (etancheite, Regle 12) :
- * sans tournoi actif, on n'affiche pas la camera.
+ * sans tournoi actif, on n'affiche pas la console de scan.
+ *
+ * Deux modes (cf. QrScanner) : camera (PC avec webcam + mobile) ou import d'image.
  */
 export default async function AdminScanPage() {
   await requireAdminRole(['super_admin', 'admin', 'referee'])
   const active = await getActiveTournamentForAdmin()
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-4 sm:p-6">
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-6 p-4 sm:p-6">
       <header className="flex flex-col gap-1">
         <p className="text-xs uppercase tracking-wider text-text-secondary">
           Jour J
@@ -28,6 +30,9 @@ export default async function AdminScanPage() {
         <h1 className="text-2xl font-bold text-text-primary">
           Scan des badges
         </h1>
+        <p className="text-sm text-text-secondary">
+          Scanne le QR a la camera, ou importe une image du badge.
+        </p>
       </header>
 
       {active ? (
@@ -39,7 +44,7 @@ export default async function AdminScanPage() {
             Aucun tournoi actif
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-text-secondary">
-            Definis un tournoi actif pour pouvoir scanner les badges a l entree.
+            {"Definis un tournoi actif pour pouvoir scanner les badges a l'entree."}
           </p>
         </section>
       )}

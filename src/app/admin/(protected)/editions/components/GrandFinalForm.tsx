@@ -186,7 +186,7 @@ export function GrandFinalForm({
         noValidate
       >
         {/* ─── 1. Identité ─────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Identité</CardTitle>
             <CardDescription>
@@ -201,7 +201,7 @@ export function GrandFinalForm({
                 <FormItem className="md:col-span-2">
                   <FormLabel>Nom du tournoi</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       placeholder="Ex : Coupe Inaugurale de Pointe-Noire"
                       {...field}
                     />
@@ -218,7 +218,7 @@ export function GrandFinalForm({
                 <FormItem className="md:col-span-2">
                   <FormLabel>Capacité (nombre de joueurs)</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="number"
                       min={1}
                       max={1024}
@@ -242,7 +242,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 2. Dates ─────────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Dates</CardTitle>
             <CardDescription>
@@ -257,7 +257,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Date de début</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" type="date" {...field} />
                   </FormControl>
                   <FormDescription>
                     Idéalement un samedi pour les tournois Hors Saison.
@@ -274,7 +274,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Date de fin</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" type="date" {...field} />
                   </FormControl>
                   <FormDescription>
                     Souvent le dimanche suivant.
@@ -287,7 +287,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 3. Jeu ──────────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Jeu</CardTitle>
             <CardDescription>
@@ -302,7 +302,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Nom du jeu</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -361,7 +361,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 4. Match ────────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Format des matchs</CardTitle>
             <CardDescription>
@@ -394,7 +394,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 5. Règles ───────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Règles de discipline</CardTitle>
             <CardDescription>
@@ -427,7 +427,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 6. Inscriptions et prix ─────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Inscriptions, prix et consoles</CardTitle>
             <CardDescription>
@@ -467,7 +467,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 7. Horaires ─────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Horaires de l&apos;événement</CardTitle>
             <CardDescription>
@@ -499,7 +499,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 8. Paiement Mobile Money ─────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Coordonnées Mobile Money</CardTitle>
             <CardDescription>
@@ -515,7 +515,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>MTN Mobile Money — numéro</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="tel"
                       placeholder="+242 06 XX XX XX XX"
                       {...field}
@@ -532,7 +532,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>MTN — titulaire</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -545,7 +545,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Airtel Money — numéro</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="tel"
                       placeholder="+242 06 XX XX XX XX"
                       {...field}
@@ -562,7 +562,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Airtel — titulaire</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -572,7 +572,7 @@ export function GrandFinalForm({
         </Card>
 
         {/* ─── 9. Lieu ─────────────────────────────────────────────── */}
-        <Card>
+        <Card className="rounded-2xl border-0 bg-surface-1 shadow-none">
           <CardHeader>
             <CardTitle>Lieu de l&apos;événement</CardTitle>
             <CardDescription>
@@ -588,7 +588,7 @@ export function GrandFinalForm({
                 <FormItem className="md:col-span-2">
                   <FormLabel>Adresse</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -601,7 +601,7 @@ export function GrandFinalForm({
                 <FormItem className="md:col-span-2">
                   <FormLabel>Lien Google Maps</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
                       type="url"
                       placeholder="https://maps.google.com/..."
                       {...field}
@@ -618,7 +618,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Ville</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -631,7 +631,7 @@ export function GrandFinalForm({
                 <FormItem>
                   <FormLabel>Pays</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -690,7 +690,7 @@ function NumberField({ control, name, label, min, max }: NumberFieldProps) {
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input
+            <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
               type="number"
               min={min}
               max={max}
@@ -724,7 +724,7 @@ function TimeField({ control, name, label }: TimeFieldProps) {
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input
+            <Input className="border-0 bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent-violet"
               type="time"
               value={(field.value as string | undefined) ?? ''}
               onChange={field.onChange}

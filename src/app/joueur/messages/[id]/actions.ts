@@ -23,8 +23,9 @@ function toFieldErrors(error: z.ZodError): Record<string, string[]> {
 }
 
 /**
- * Reponse du joueur a un message. Le serveur revérifie l'autorisation
- * (`allow_replies` du parent) dans `createPlayerReply` (la RLS est la 2e barriere).
+ * Reponse du joueur a un message. Le serveur reverifie l'autorisation
+ * (`allow_replies` du parent) et le quota (2 reponses depuis le dernier message
+ * admin) dans `createPlayerReply` (la RLS + le trigger DB sont les barrieres dures).
  */
 export async function replyAction(raw: {
   parentMessageId: string
@@ -50,10 +51,12 @@ export async function replyAction(raw: {
   if (!result.ok) {
     const message =
       result.reason === 'reply_not_allowed'
-        ? "Les reponses ne sont pas autorisees pour ce message."
-        : result.reason === 'parent_not_found'
-          ? 'Message introuvable.'
-          : "L'envoi a echoue, reessaie."
+        ? 'Les reponses ne sont pas autorisees pour ce message.'
+        : result.reason === 'reply_limit_reached'
+          ? "Tu as deja utilise tes 2 reponses. Attends que l'admin relance la discussion."
+          : result.reason === 'parent_not_found'
+            ? 'Message introuvable.'
+            : "L'envoi a echoue, reessaie."
     return actionError(message)
   }
 

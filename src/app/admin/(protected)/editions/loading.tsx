@@ -1,46 +1,32 @@
 /**
- * Skeleton de la page Éditions (M03.D).
- *
- * Affiché automatiquement par Next.js pendant le chargement initial
- * (Server Component avec await sur listEditions).
+ * Skeleton de la page Éditions (refonte) — liste en cartes, No-Line.
  */
-import { cn } from '@/lib/utils'
-
 export default function EditionsLoading() {
   return (
     <div className="space-y-6">
-      {/* En-tête */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-2">
-          <div className="h-7 w-40 rounded bg-surface-2 animate-pulse" />
-          <div className="h-4 w-72 rounded bg-surface-2/60 animate-pulse" />
+          <div className="h-8 w-64 animate-pulse rounded bg-surface-2" />
+          <div className="h-4 w-80 max-w-full animate-pulse rounded bg-surface-2/60" />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-44 rounded-md bg-surface-2 animate-pulse" />
-          <div className="h-8 w-36 rounded-md bg-surface-2 animate-pulse" />
+        <div className="flex gap-2">
+          <div className="h-9 w-48 animate-pulse rounded-lg bg-surface-2" />
+          <div className="h-9 w-36 animate-pulse rounded-lg bg-surface-2" />
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-border bg-surface-1">
-        <div className="border-b border-border bg-surface-2/40 px-6 py-3">
-          <div className="h-3 w-full max-w-md rounded bg-surface-2 animate-pulse" />
-        </div>
+      <div className="flex flex-col gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className={cn(
-              'px-6 py-4',
-              'border-b border-border last:border-0',
-              'flex items-center justify-between gap-4',
-            )}
+            className="flex items-center justify-between gap-4 rounded-2xl bg-surface-1 p-6"
           >
-            <div className="flex items-center gap-3 flex-1">
-              <div className="h-5 w-24 rounded-full bg-surface-2 animate-pulse" />
-              <div className="h-4 w-40 rounded bg-surface-2 animate-pulse" />
-              <div className="h-4 w-28 rounded bg-surface-2/60 animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-28 animate-pulse rounded-full bg-surface-2" />
+              <div className="h-5 w-48 animate-pulse rounded bg-surface-2" />
+              <div className="h-3 w-40 animate-pulse rounded bg-surface-2/60" />
             </div>
-            <div className="h-8 w-16 rounded-md bg-surface-2 animate-pulse" />
+            <div className="h-9 w-24 animate-pulse rounded-lg bg-surface-2" />
           </div>
         ))}
       </div>

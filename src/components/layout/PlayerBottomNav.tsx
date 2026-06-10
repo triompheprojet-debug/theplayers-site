@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  CreditCard,
+  Banknote,
   FileText,
   Home,
   MessageSquare,
@@ -22,8 +22,8 @@ interface NavItem {
 
 const ITEMS: NavItem[] = [
   { href: ROUTES.player.dashboard, icon: Home, label: 'Accueil' },
-  { href: ROUTES.player.documents, icon: FileText, label: 'Docs' },
-  { href: ROUTES.player.payment, icon: CreditCard, label: 'Paiement' },
+  { href: ROUTES.player.documents, icon: FileText, label: 'Documents' },
+  { href: ROUTES.player.payment, icon: Banknote, label: 'Paiement' },
   { href: ROUTES.player.messages, icon: MessageSquare, label: 'Messages' },
   { href: ROUTES.player.profile, icon: User, label: 'Profil' },
 ]
@@ -43,7 +43,7 @@ export function PlayerBottomNav() {
   return (
     <nav
       aria-label="Navigation joueur"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/5 bg-surface-1/80 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-50 bg-surface-1/80 backdrop-blur-md"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-around">
         {ITEMS.map(({ href, icon: Icon, label }) => {
@@ -58,22 +58,27 @@ export function PlayerBottomNav() {
                 href={href}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex h-16 flex-col items-center justify-center gap-1 px-1',
+                  'relative flex h-16 flex-col items-center justify-center gap-1.5 px-1',
                   'transition-transform active:scale-95',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-violet',
                   isActive
                     ? 'text-accent-violet'
                     : 'text-text-secondary hover:text-text-primary',
                 )}
               >
-                <Icon
-                  className="h-6 w-6"
-                  strokeWidth={isActive ? 2.4 : 2}
-                  aria-hidden="true"
-                />
+                {isActive ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 h-1 w-8 rounded-full bg-accent-violet shadow-[0_0_8px_2px_rgba(139,92,246,0.6)]"
+                  />
+                ) : null}
+
+                <Icon className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
+
                 <span
                   className={cn(
-                    'text-[11px] leading-none',
-                    isActive && 'font-semibold',
+                    'text-[10px] uppercase leading-none tracking-wide',
+                    isActive ? 'font-bold' : 'font-medium',
                   )}
                 >
                   {label}

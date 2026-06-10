@@ -18,24 +18,29 @@ interface ReplyRow {
   id: string
   body: string
   sent_at: string
+  parent_message_id: string | null
   sender: { pseudo: string; phone: string | null } | null
-  parent: { subject: string } | null
 }
 
 /**
  * Boite de reception admin (M12) : reponses des joueurs (sender_type='player').
  * Lien WhatsApp genere depuis le telephone du joueur (jamais expose ailleurs).
+ *
+ * NB : l'embed auto-referentiel messages->messages (parent) echoue dans le cache
+ * de schema PostgREST. On recupere donc les sujets des messages parents par une
+ * 2e requete `.in()` (l'embed profiles, lui, n'est pas auto-referentiel : OK).
  */
 export default async function AdminReceivedMessagesPage() {
   await requireAdminRole(['super_admin', 'admin'])
 
   const supabase = createServiceRoleClient()
+
+  // 1. Reponses joueur + auteur (embed profiles via FK : non auto-referentiel).
   const { data, error } = await supabase
     .from('messages')
     .select(
-      `id, body, sent_at,
-       sender:profiles!messages_sender_player_id_fkey ( pseudo, phone ),
-       parent:messages!messages_parent_message_id_fkey ( subject )`,
+      `id, body, sent_at, parent_message_id,
+       sender:profiles!messages_sender_player_id_fkey ( pseudo, phone )`,
     )
     .eq('sender_type', 'player')
     .order('sent_at', { ascending: false })
@@ -46,6 +51,28 @@ export default async function AdminReceivedMessagesPage() {
   }
 
   const replies = (data ?? []) as unknown as ReplyRow[]
+
+  // 2. Sujets des messages parents en UNE requete (evite le self-embed PostgREST).
+  const parentIds = Array.from(
+    new Set(
+      replies
+        .map((r) => r.parent_message_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  )
+
+  const parentSubjects = new Map<string, string>()
+  if (parentIds.length > 0) {
+    const { data: parents, error: parentsError } = await supabase
+      .from('messages')
+      .select('id, subject')
+      .in('id', parentIds)
+
+    if (parentsError) {
+      console.error('[AdminReceivedMessagesPage:parents]', parentsError.message)
+    }
+    for (const p of parents ?? []) parentSubjects.set(p.id, p.subject)
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6 lg:p-8">
@@ -87,12 +114,12 @@ export default async function AdminReceivedMessagesPage() {
                   `Bonjour ${reply.sender?.pseudo ?? ''}`.trim(),
                 )
               : null
+            const parentSubject = reply.parent_message_id
+              ? parentSubjects.get(reply.parent_message_id)
+              : null
 
             return (
-              <li
-                key={reply.id}
-                className="rounded-xl bg-surface-1 p-4"
-              >
+              <li key={reply.id} className="rounded-xl bg-surface-1 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     {reply.sender ? (
@@ -102,9 +129,9 @@ export default async function AdminReceivedMessagesPage() {
                         Joueur inconnu
                       </span>
                     )}
-                    {reply.parent ? (
+                    {parentSubject ? (
                       <p className="mt-0.5 truncate text-xs text-text-secondary">
-                        En reponse a : {reply.parent.subject}
+                        En reponse a : {parentSubject}
                       </p>
                     ) : null}
                   </div>
