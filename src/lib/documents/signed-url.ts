@@ -12,12 +12,13 @@ const DEFAULT_TTL_SECONDS = 300
 export async function createDocumentSignedUrl(
   storagePath: string,
   ttlSeconds: number = DEFAULT_TTL_SECONDS,
+  download: boolean | string = false,  
 ): Promise<string | null> {
   const supabase = createServiceRoleClient()
 
   const { data, error } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(storagePath, ttlSeconds)
+    .createSignedUrl(storagePath, ttlSeconds, download ? { download } : undefined)
 
   if (error) {
     console.error('[createDocumentSignedUrl]', error.message)

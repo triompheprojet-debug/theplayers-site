@@ -22,7 +22,7 @@ export function DocumentCard({ doc }: { doc: PlayerDocument }) {
     startTransition(async () => {
       const res = await downloadDocument(doc.id)
       if (res.success) {
-        window.open(res.data.url, '_blank', 'noopener,noreferrer')
+        window.location.href = res.data.url
       } else {
         toast.error(res.error)
       }

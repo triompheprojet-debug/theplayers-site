@@ -36,7 +36,7 @@ export async function downloadDocument(
     return { success: false, error: 'Ce document doit être régénéré.' }
   }
 
-  const url = await createDocumentSignedUrl(doc.storage_path, 300)
+  const url = await createDocumentSignedUrl(doc.storage_path, 300, true)
   if (!url) return { success: false, error: 'Lien indisponible' }
   return { success: true, data: { url } }
 }
