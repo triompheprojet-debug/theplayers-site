@@ -90,3 +90,61 @@ COMMIT;
 --     WHERE tournament_id='<T>' AND player_id='<P>';
 --   SELECT badge_number FROM public.registrations
 --     WHERE tournament_id='<T>' AND player_id='<P>';   -- → 1 (puis 2, 3, …)
+
+-- ============================================================================
+-- BLOC À AJOUTER À LA FIN DE : supabase/migrations/20260523205320_19_create_triggers.sql
+-- (et à exécuter SEUL dans le SQL Editor — ne pas re-exécuter le haut du fichier)
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- [M14] trg_matches_advance_winner
+-- AFTER UPDATE sur matches : quand un match obtient un vainqueur (statut
+-- 'completed' OU 'forfeit' avec winner_id non NULL), appelle
+-- advance_winner_in_bracket(NEW.id) pour pousser le vainqueur au tour suivant.
+--
+-- Se redéclenche aussi si l'admin CORRIGE le vainqueur d'un match déjà
+-- terminé (changement de winner_id) → le slot du match suivant est écrasé
+-- avec le bon joueur.
+--
+-- Pas de récursion problématique : l'UPDATE du match suivant re-déclenche le
+-- trigger, mais ce match n'a ni statut terminal ni winner_id → no-op.
+-- ---------------------------------------------------------------------------
+
+BEGIN;
+
+CREATE OR REPLACE FUNCTION public.trigger_advance_winner()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  IF NEW.winner_id IS NOT NULL
+     AND NEW.status IN ('completed', 'forfeit')
+     AND (
+       OLD.status IS DISTINCT FROM NEW.status
+       OR OLD.winner_id IS DISTINCT FROM NEW.winner_id
+     ) THEN
+    PERFORM public.advance_winner_in_bracket(NEW.id);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+COMMENT ON FUNCTION public.trigger_advance_winner() IS
+  'AFTER UPDATE : à l''obtention/correction d''un vainqueur (completed/forfeit), avance le vainqueur au match suivant via advance_winner_in_bracket. M14.';
+
+DROP TRIGGER IF EXISTS trg_matches_advance_winner ON public.matches;
+CREATE TRIGGER trg_matches_advance_winner
+  AFTER UPDATE ON public.matches
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trigger_advance_winner();
+
+COMMIT;
+
+-- ============================================================================
+-- Vérifications post-migration
+-- ============================================================================
+-- SELECT tgname FROM pg_trigger
+--   WHERE tgrelid = 'public.matches'::regclass AND NOT tgisinternal;
+--   -- trg_matches_updated_at + trg_matches_advance_winner

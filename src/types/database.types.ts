@@ -274,6 +274,151 @@ export type Database = {
           },
         ]
       }
+      matches: {
+        Row: {
+          bracket_position: string | null
+          console_number: number | null
+          created_at: string
+          forfeit_player_id: string | null
+          forfeit_reason: string | null
+          id: string
+          match_number: number
+          next_match_id: string | null
+          next_match_slot: string | null
+          played_at: string | null
+          player_a_badge: number | null
+          player_a_id: string | null
+          player_b_badge: number | null
+          player_b_id: string | null
+          round_number: number
+          scheduled_time: string | null
+          score_a: number | null
+          score_b: number | null
+          scored_by: string | null
+          status: Database["public"]["Enums"]["match_status"]
+          tournament_id: string
+          updated_at: string
+          wave_number: number | null
+          winner_id: string | null
+        }
+        Insert: {
+          bracket_position?: string | null
+          console_number?: number | null
+          created_at?: string
+          forfeit_player_id?: string | null
+          forfeit_reason?: string | null
+          id?: string
+          match_number: number
+          next_match_id?: string | null
+          next_match_slot?: string | null
+          played_at?: string | null
+          player_a_badge?: number | null
+          player_a_id?: string | null
+          player_b_badge?: number | null
+          player_b_id?: string | null
+          round_number: number
+          scheduled_time?: string | null
+          score_a?: number | null
+          score_b?: number | null
+          scored_by?: string | null
+          status?: Database["public"]["Enums"]["match_status"]
+          tournament_id: string
+          updated_at?: string
+          wave_number?: number | null
+          winner_id?: string | null
+        }
+        Update: {
+          bracket_position?: string | null
+          console_number?: number | null
+          created_at?: string
+          forfeit_player_id?: string | null
+          forfeit_reason?: string | null
+          id?: string
+          match_number?: number
+          next_match_id?: string | null
+          next_match_slot?: string | null
+          played_at?: string | null
+          player_a_badge?: number | null
+          player_a_id?: string | null
+          player_b_badge?: number | null
+          player_b_id?: string | null
+          round_number?: number
+          scheduled_time?: string | null
+          score_a?: number | null
+          score_b?: number | null
+          scored_by?: string | null
+          status?: Database["public"]["Enums"]["match_status"]
+          tournament_id?: string
+          updated_at?: string
+          wave_number?: number | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_forfeit_player_id_fkey"
+            columns: ["forfeit_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_next_match_id_fkey"
+            columns: ["next_match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_next_match_id_fkey"
+            columns: ["next_match_id"]
+            isOneToOne: false
+            referencedRelation: "public_bracket_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player_a_id_fkey"
+            columns: ["player_a_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player_b_id_fkey"
+            columns: ["player_b_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_scored_by_fkey"
+            columns: ["scored_by"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           allow_replies: boolean
@@ -961,6 +1106,58 @@ export type Database = {
         }
         Relationships: []
       }
+      public_bracket_view: {
+        Row: {
+          bracket_position: string | null
+          console_number: number | null
+          id: string | null
+          match_number: number | null
+          next_match_id: string | null
+          next_match_slot: string | null
+          player_a_badge: number | null
+          player_a_pseudo: string | null
+          player_b_badge: number | null
+          player_b_pseudo: string | null
+          round_number: number | null
+          scheduled_time: string | null
+          score_a: number | null
+          score_b: number | null
+          status: Database["public"]["Enums"]["match_status"] | null
+          tournament_id: string | null
+          wave_number: number | null
+          winner_side: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_next_match_id_fkey"
+            columns: ["next_match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_next_match_id_fkey"
+            columns: ["next_match_id"]
+            isOneToOne: false
+            referencedRelation: "public_bracket_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_tournament_view: {
         Row: {
           bracket_visibility: string | null
@@ -1080,6 +1277,10 @@ export type Database = {
       }
     }
     Functions: {
+      advance_winner_in_bracket: {
+        Args: { p_match_id: string }
+        Returns: undefined
+      }
       assign_badge_number: {
         Args: { p_registration_id: string }
         Returns: number
@@ -1110,6 +1311,10 @@ export type Database = {
         }[]
       }
       get_app_config: { Args: { p_key: string }; Returns: Json }
+      is_bracket_published: {
+        Args: { p_tournament_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       admin_role: "super_admin" | "admin" | "referee"

@@ -84,6 +84,12 @@ export interface TournamentDefaultsPrizes {
 export interface TournamentDefaultsConsoles {
   active_count: number
 }
+export interface TournamentDefaultsBracket {
+  /** Heure de début du round 1 au format "HH:MM" (le jour = start_date du tournoi). */
+  start_time: string
+  /** Marge d'arrivée demandée au joueur avant le début de sa vague (minutes). */
+  arrival_advance_minutes: number
+}
 
 export interface TournamentDefaultsSchedule {
   saturday_arrival: string
@@ -111,6 +117,7 @@ export interface TournamentDefaults {
   registration: TournamentDefaultsRegistration
   prizes: TournamentDefaultsPrizes
   consoles: TournamentDefaultsConsoles
+  bracket: TournamentDefaultsBracket
   schedule: TournamentDefaultsSchedule
   payment: TournamentDefaultsPayment
 }

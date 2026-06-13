@@ -218,3 +218,72 @@ GRANT EXECUTE ON FUNCTION public.assign_badge_number(uuid) TO service_role;
 -- Vérification
 -- ============================================================================
 -- SELECT proname FROM pg_proc WHERE proname = 'assign_badge_number';  -- 1 ligne
+
+-- ============================================================================
+-- BLOC À AJOUTER À LA FIN DE : supabase/migrations/20260523205316_18_create_functions.sql
+-- (et à exécuter SEUL dans le SQL Editor — ne pas re-exécuter le haut du fichier)
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- [M14] advance_winner_in_bracket(p_match_id uuid)
+-- Place le vainqueur d'un match dans le slot A/B du match suivant et recopie
+-- son badge (affichage). No-op si pas de vainqueur ou pas de match suivant
+-- (finale). Appelée par le trigger trg_matches_advance_winner (migration 19) ;
+-- jamais exposée aux clients.
+--
+-- Idempotente et tolérante aux corrections : si l'admin corrige un score et
+-- que le vainqueur change, le nouveau vainqueur ÉCRASE l'ancien dans le slot.
+-- (Les corrections en cascade sur des rounds déjà joués plus loin restent une
+-- opération admin manuelle — cas hors périmètre du trigger.)
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.advance_winner_in_bracket(p_match_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_winner_id  uuid;
+  v_next_id    uuid;
+  v_next_slot  char(1);
+  v_player_a   uuid;
+  v_badge_a    int;
+  v_badge_b    int;
+  v_badge      int;
+BEGIN
+  SELECT winner_id, next_match_id, next_match_slot,
+         player_a_id, player_a_badge, player_b_badge
+    INTO v_winner_id, v_next_id, v_next_slot,
+         v_player_a, v_badge_a, v_badge_b
+  FROM public.matches
+  WHERE id = p_match_id;
+
+  IF NOT FOUND OR v_winner_id IS NULL OR v_next_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  v_badge := CASE WHEN v_winner_id = v_player_a THEN v_badge_a ELSE v_badge_b END;
+
+  IF v_next_slot = 'A' THEN
+    UPDATE public.matches
+       SET player_a_id = v_winner_id, player_a_badge = v_badge
+     WHERE id = v_next_id;
+  ELSIF v_next_slot = 'B' THEN
+    UPDATE public.matches
+       SET player_b_id = v_winner_id, player_b_badge = v_badge
+     WHERE id = v_next_id;
+  END IF;
+END;
+$$;
+
+COMMENT ON FUNCTION public.advance_winner_in_bracket(uuid) IS
+  'Avance le vainqueur d''un match dans le slot A/B du match suivant (badge recopié). Appelée par trigger AFTER UPDATE sur matches (M14). service_role/trigger uniquement.';
+
+-- Jamais appelable par les clients : trigger DEFINER + service_role seulement
+REVOKE ALL ON FUNCTION public.advance_winner_in_bracket(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.advance_winner_in_bracket(uuid) TO service_role;
+
+-- ============================================================================
+-- Vérification
+-- ============================================================================
+-- SELECT proname FROM pg_proc WHERE proname = 'advance_winner_in_bracket';  -- 1 ligne

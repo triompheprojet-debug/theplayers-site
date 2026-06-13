@@ -89,3 +89,65 @@ GRANT SELECT ON public_tournament_view TO anon, authenticated;
 -- SELECT column_name FROM information_schema.columns
 --   WHERE table_name = 'public_tournament_view' ORDER BY ordinal_position;
 -- → ne doit PAS contenir 'capacity' ni 'config'
+
+-- ============================================================================
+-- BLOC À AJOUTER À LA FIN DE : supabase/migrations/20260523205310_17_create_views.sql
+-- (et à exécuter SEUL dans le SQL Editor — ne pas re-exécuter le haut du fichier)
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- [M14] public_bracket_view
+-- Bracket public : PSEUDOS UNIQUEMENT (Règle 2), jamais de noms réels,
+-- jamais de capacity (Règle 1), jamais d'identifiants joueurs (player_*_id
+-- exclus — seuls pseudo + badge sont exposés).
+--
+-- Visible UNIQUEMENT si le tournoi a bracket_visibility = 'published'
+-- (le filtre est dans la vue elle-même : défense en profondeur en plus de la
+-- RLS posée sur matches en migration 09).
+--
+-- next_match_id / next_match_slot sont exposés (UUID de matchs, non sensibles)
+-- pour permettre le rendu des connexions de l'arbre côté client.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE VIEW public_bracket_view AS
+SELECT
+  m.id,
+  m.tournament_id,
+  m.round_number,
+  m.match_number,
+  m.bracket_position,
+  pa.pseudo            AS player_a_pseudo,
+  pb.pseudo            AS player_b_pseudo,
+  m.player_a_badge,
+  m.player_b_badge,
+  m.score_a,
+  m.score_b,
+  m.status,
+  m.wave_number,
+  m.console_number,
+  m.scheduled_time,
+  CASE
+    WHEN m.winner_id IS NULL THEN NULL
+    WHEN m.winner_id = m.player_a_id THEN 'a'
+    ELSE 'b'
+  END                  AS winner_side,
+  m.next_match_id,
+  m.next_match_slot
+FROM matches m
+LEFT JOIN profiles pa ON pa.id = m.player_a_id
+LEFT JOIN profiles pb ON pb.id = m.player_b_id
+JOIN tournaments t    ON t.id = m.tournament_id
+WHERE t.bracket_visibility = 'published'
+  AND t.is_deleted = false;
+
+COMMENT ON VIEW public_bracket_view IS
+  'Bracket public (M14) : pseudos + badges uniquement, visible seulement si bracket_visibility = published. EXCLUT noms réels, capacity et identifiants joueurs.';
+
+GRANT SELECT ON public_bracket_view TO anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Vérifications post-migration
+-- ---------------------------------------------------------------------------
+-- SELECT column_name FROM information_schema.columns
+--   WHERE table_name = 'public_bracket_view' ORDER BY ordinal_position;
+--   -- ne doit contenir NI player_a_id NI player_b_id NI winner_id
+-- SELECT count(*) FROM public_bracket_view;  -- 0 tant que rien n'est publié
