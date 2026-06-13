@@ -23,8 +23,10 @@ export interface UseRealtimeBracket {
  * - Souscrit aux changements de `matches` (filtre tournoi) ; à chaque
  *   événement, refetch la vue (la donnée sensible ne transite jamais par le
  *   canal Realtime).
- * - AUCUN `setState` synchrone dans l'effet : l'état est posé dans des
- *   callbacks async (règle `react-hooks/set-state-in-effect`).
+ * - AUCUN `setState` synchrone dans l'effet (règle `react-hooks/set-state-in-effect`) :
+ *   la requête est lancée DANS l'effet et `setState` n'est appelé QUE dans le
+ *   callback `.then` (mise à jour asynchrone), jamais dans le corps de l'effet
+ *   ni via une fonction qui poserait l'état de façon synchrone.
  *
  * `tournamentId` null/undefined → hook inerte (utile avant résolution du
  * tournoi actif côté Server Component parent).
@@ -37,44 +39,49 @@ export function useRealtimeBracket(
   const [matches, setMatches] = useState<BracketMatchRealtime[]>([])
   const [fetchedFor, setFetchedFor] = useState<string | null>(null)
 
-  const fetchMatches = useCallback(
-    async (id: string) => {
-      const { data } = await supabase
-        .from('public_bracket_view')
-        .select('*')
-        .eq('tournament_id', id)
-        .order('round_number', { ascending: true })
-        .order('match_number', { ascending: true })
-
-      setMatches((data ?? []) as unknown as BracketMatchRealtime[])
-      setFetchedFor(id)
-    },
-    [supabase],
-  )
-
   useEffect(() => {
     if (!tournamentId) return
 
     let active = true
-    void fetchMatches(tournamentId).then(() => {
-      if (!active) return
-    })
+
+    // Requête de la vue publique. setState UNIQUEMENT dans le `.then`.
+    const load = () => {
+      void supabase
+        .from('public_bracket_view')
+        .select('*')
+        .eq('tournament_id', tournamentId)
+        .order('round_number', { ascending: true })
+        .order('match_number', { ascending: true })
+        .then(({ data }) => {
+          if (!active) return
+          setMatches((data ?? []) as unknown as BracketMatchRealtime[])
+          setFetchedFor(tournamentId)
+        })
+    }
+
+    load()
 
     const channel = subscribeToBracket(supabase, tournamentId, {
-      onChange: () => {
-        void fetchMatches(tournamentId)
-      },
+      onChange: () => load(),
     })
 
     return () => {
       active = false
       void supabase.removeChannel(channel)
     }
-  }, [supabase, tournamentId, fetchMatches])
+  }, [supabase, tournamentId])
 
   const refresh = useCallback(async () => {
-    if (tournamentId) await fetchMatches(tournamentId)
-  }, [tournamentId, fetchMatches])
+    if (!tournamentId) return
+    const { data } = await supabase
+      .from('public_bracket_view')
+      .select('*')
+      .eq('tournament_id', tournamentId)
+      .order('round_number', { ascending: true })
+      .order('match_number', { ascending: true })
+    setMatches((data ?? []) as unknown as BracketMatchRealtime[])
+    setFetchedFor(tournamentId)
+  }, [supabase, tournamentId])
 
   const isLoading = tournamentId != null && fetchedFor !== tournamentId
 

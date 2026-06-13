@@ -101,7 +101,7 @@ export default async function TournamentPage() {
           className="object-cover object-center"
         />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-background/20"
+          className="absolute inset-0 bg-linear-to-t from-background via-background/75 to-background/20"
           aria-hidden
         />
         <div className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-10 md:px-6 md:pb-14">
@@ -135,7 +135,7 @@ export default async function TournamentPage() {
               <div className="mt-2 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href={ROUTES.signUp}
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-gradient-to-br from-accent-violet to-accent-violet-dim px-8 font-bold text-text-on-accent shadow-glow-violet transition-transform active:scale-[0.98]"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-linear-to-br from-accent-violet to-accent-violet-dim px-8 font-bold text-text-on-accent shadow-glow-violet transition-transform active:scale-[0.98]"
                 >
                   {"S'inscrire en ligne"}
                   <ArrowRight className="size-5" aria-hidden />
@@ -273,7 +273,7 @@ export default async function TournamentPage() {
                   className="object-cover object-center"
                 />
                 <div
-                  className="absolute inset-0 bg-gradient-to-t from-surface-1/60 to-transparent md:bg-gradient-to-r"
+                  className="absolute inset-0 bg-linear-to-t from-surface-1/60 to-transparent md:bg-linear-to-r"
                   aria-hidden
                 />
               </div>
@@ -333,7 +333,7 @@ export default async function TournamentPage() {
 
         {/* Appel final */}
         {canRegister && (
-          <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-accent-violet/15 to-surface-1 p-8 text-center md:p-12">
+          <section className="overflow-hidden rounded-2xl bg-linear-to-br from-accent-violet/15 to-surface-1 p-8 text-center md:p-12">
             <h2 className="text-2xl font-black text-text-primary md:text-4xl">
               {"Prêt à entrer dans l'arène ?"}
             </h2>
@@ -344,7 +344,7 @@ export default async function TournamentPage() {
             </p>
             <Link
               href={ROUTES.signUp}
-              className="mt-6 inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-gradient-to-br from-accent-violet to-accent-violet-dim px-8 font-bold text-text-on-accent shadow-glow-violet transition-transform active:scale-[0.98]"
+              className="mt-6 inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-linear-to-br from-accent-violet to-accent-violet-dim px-8 font-bold text-text-on-accent shadow-glow-violet transition-transform active:scale-[0.98]"
             >
               {"S'inscrire en ligne"}
               <ArrowRight className="size-5" aria-hidden />
