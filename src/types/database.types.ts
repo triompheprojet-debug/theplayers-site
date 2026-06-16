@@ -899,6 +899,57 @@ export type Database = {
           },
         ]
       }
+      season_standings: {
+        Row: {
+          best_finish: string | null
+          current_rank: Database["public"]["Enums"]["player_rank"]
+          id: string
+          last_updated_at: string
+          player_id: string
+          qualified_grand_final: boolean
+          season_id: string
+          total_points: number
+          tournaments_played: number
+        }
+        Insert: {
+          best_finish?: string | null
+          current_rank?: Database["public"]["Enums"]["player_rank"]
+          id?: string
+          last_updated_at?: string
+          player_id: string
+          qualified_grand_final?: boolean
+          season_id: string
+          total_points?: number
+          tournaments_played?: number
+        }
+        Update: {
+          best_finish?: string | null
+          current_rank?: Database["public"]["Enums"]["player_rank"]
+          id?: string
+          last_updated_at?: string
+          player_id?: string
+          qualified_grand_final?: boolean
+          season_id?: string
+          total_points?: number
+          tournaments_played?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_standings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_standings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           created_at: string
@@ -961,6 +1012,73 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_standings: {
+        Row: {
+          finalized_at: string
+          goals_conceded: number
+          goals_scored: number
+          id: string
+          matches_lost: number
+          matches_played: number
+          matches_won: number
+          player_id: string
+          points_earned: number
+          position: number
+          round_reached: string
+          tournament_id: string
+        }
+        Insert: {
+          finalized_at?: string
+          goals_conceded?: number
+          goals_scored?: number
+          id?: string
+          matches_lost?: number
+          matches_played?: number
+          matches_won?: number
+          player_id: string
+          points_earned?: number
+          position: number
+          round_reached: string
+          tournament_id: string
+        }
+        Update: {
+          finalized_at?: string
+          goals_conceded?: number
+          goals_scored?: number
+          id?: string
+          matches_lost?: number
+          matches_played?: number
+          matches_won?: number
+          player_id?: string
+          points_earned?: number
+          position?: number
+          round_reached?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_standings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_standings_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "public_tournament_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_standings_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
             referencedColumns: ["id"]
           },
         ]
@@ -1154,6 +1272,25 @@ export type Database = {
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_leaderboard_view: {
+        Row: {
+          avatar_url: string | null
+          current_rank: Database["public"]["Enums"]["player_rank"] | null
+          position: number | null
+          pseudo: string | null
+          season_id: string | null
+          total_points: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_standings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
             referencedColumns: ["id"]
           },
         ]

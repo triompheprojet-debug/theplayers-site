@@ -21,6 +21,11 @@ import { requireAdminRole } from '@/lib/auth/permissions'
 import { drawBracket } from '@/lib/bracket/draw'
 import { publishBracket, unpublishBracket } from '@/lib/bracket/publish'
 import { submitMatchScore } from '@/lib/bracket/submit-score'
+import { recomputeSeasonStandingsForTournament } from '@/lib/standings/season-standings'
+import {
+  computeTournamentStandings,
+  type PendingTieBreak,
+} from '@/lib/standings/tournament-standings'
 import { getActiveTournamentId } from '@/lib/config/active-tournament'
 import { ROUTES } from '@/config/routes'
 import {
@@ -277,5 +282,126 @@ export async function submitForfeitAction(
   return actionSuccess({
     status: result.status,
     nextAlreadyPlayed: result.nextAlreadyPlayed,
+  })
+}
+// ===========================================================================
+// 5. Classement final (M16) — calcul + départage manuel 3ᵉ/4ᵉ
+// ===========================================================================
+
+export type ComputeStandingsActionData =
+  | { finalized: true; standingsCount: number }
+  | { finalized: false; pendingTieBreak: PendingTieBreak }
+
+const STANDINGS_ERROR_MESSAGES: Record<string, string> = {
+  tournament_not_found: 'Tournoi introuvable.',
+  no_bracket: "Aucun bracket : effectuez d'abord le tirage.",
+  not_finished:
+    "Le tournoi n'est pas terminé : chaque match doit avoir un vainqueur.",
+  invalid_bracket: 'Structure de bracket inattendue.',
+  db_error: 'Une erreur est survenue lors du calcul du classement.',
+}
+
+function revalidateStandingsPages() {
+  revalidatePath(ROUTES.admin.tournament)
+  revalidatePath(ROUTES.ranking)
+  revalidatePath(ROUTES.player.ranking)
+}
+
+/**
+ * Calcule et fige le classement final du tournoi actif. Si les 3ᵉ/4ᵉ ne peuvent
+ * être départagés automatiquement (égalité stricte en demi), renvoie la paire à
+ * trancher (`finalized: false`). Pour un tournoi de saison, recalcule ensuite le
+ * classement cumulé.
+ */
+export async function computeTournamentStandingsAction(
+  tournamentId: string,
+): Promise<ActionResult<ComputeStandingsActionData>> {
+  const session = await requireAdminRole(ADMIN_ROLES)
+
+  const activeError = await assertActiveTournament(tournamentId)
+  if (activeError) return actionError(activeError)
+
+  const result = await computeTournamentStandings(tournamentId)
+  if (!result.ok) {
+    return actionError(
+      STANDINGS_ERROR_MESSAGES[result.reason] ?? 'Calcul impossible.',
+    )
+  }
+
+  if (!result.finalized) {
+    return actionSuccess({
+      finalized: false,
+      pendingTieBreak: result.pendingTieBreak,
+    })
+  }
+
+  const season = await recomputeSeasonStandingsForTournament(tournamentId)
+
+  await logActivity({
+    adminId: session.adminId,
+    actionType: 'compute_standings',
+    targetTable: 'tournament_standings',
+    targetId: tournamentId,
+    description: `Classement calculé (${result.standingsCount} joueurs)`,
+    metadata: {
+      tournamentId,
+      standingsCount: result.standingsCount,
+      seasonRecomputed: season.ok && season.recomputed,
+      qualifiedCount:
+        season.ok && season.recomputed ? season.qualifiedCount : null,
+    },
+  })
+
+  revalidateStandingsPages()
+  return actionSuccess({
+    finalized: true,
+    standingsCount: result.standingsCount,
+  })
+}
+
+/**
+ * Tranche manuellement le 3ᵉ/4ᵉ en cas d'égalité stricte, puis fige le
+ * classement. `thirdPlacePlayerId` doit être l'un des deux perdants de demi.
+ */
+export async function resolveThirdPlaceAction(
+  tournamentId: string,
+  thirdPlacePlayerId: string,
+): Promise<ActionResult<ComputeStandingsActionData>> {
+  const session = await requireAdminRole(ADMIN_ROLES)
+
+  const activeError = await assertActiveTournament(tournamentId)
+  if (activeError) return actionError(activeError)
+
+  const result = await computeTournamentStandings(tournamentId, {
+    thirdPlacePlayerId,
+  })
+  if (!result.ok) {
+    return actionError(
+      STANDINGS_ERROR_MESSAGES[result.reason] ?? 'Calcul impossible.',
+    )
+  }
+  if (!result.finalized) {
+    return actionError('Le joueur choisi pour la 3ᵉ place est invalide.')
+  }
+
+  await recomputeSeasonStandingsForTournament(tournamentId)
+ 
+  await logActivity({
+    adminId: session.adminId,
+    actionType: 'resolve_third_place',
+    targetTable: 'tournament_standings',
+    targetId: tournamentId,
+    description: 'Départage 3ᵉ/4ᵉ tranché manuellement',
+    metadata: {
+      tournamentId,
+      thirdPlacePlayerId,
+      standingsCount: result.standingsCount,
+    },
+  })
+
+  revalidateStandingsPages()
+  return actionSuccess({
+    finalized: true,
+    standingsCount: result.standingsCount,
   })
 }

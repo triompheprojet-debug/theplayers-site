@@ -4,11 +4,16 @@
  * Hiérarchie des rôles : super_admin > admin > referee.
  * Mais pas de chaînage automatique — chaque vérif liste explicitement
  * les rôles autorisés pour éviter les escalades implicites.
+ *
+ * Routage par rôle : un rôle insuffisant n'est PAS renvoyé en dur vers
+ * /admin/dashboard (ce qui boucle pour un arbitre pur), mais vers la route
+ * d'accueil de SON rôle (adminHomeRoute) — /arbitre pour un referee.
  */
 import 'server-only'
 
 import { redirect } from 'next/navigation'
 
+import { adminHomeRoute } from './home-route'
 import { getAdminSession, type AdminSessionPayload } from './session'
 
 import type { Database } from '@/types/database.types'
@@ -40,14 +45,15 @@ export async function requireAdmin(): Promise<AdminSessionPayload> {
 
 /**
  * Variante : exige un rôle parmi une liste.
- * Si connecté mais rôle insuffisant → redirect dashboard (accès refusé silencieux).
+ * Si connecté mais rôle insuffisant → redirection vers la route d'accueil de
+ * son rôle (accès refusé silencieux, sans boucle).
  */
 export async function requireAdminRole(
   allowedRoles: readonly AdminRole[],
 ): Promise<AdminSessionPayload> {
   const session = await requireAdmin()
   if (!hasPermission(session.role, allowedRoles)) {
-    redirect('/admin/dashboard')
+    redirect(adminHomeRoute(session.role))
   }
   return session
 }

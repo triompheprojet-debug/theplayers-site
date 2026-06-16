@@ -12,8 +12,12 @@
  * Effets de bord :
  *  - Rate-limit DB en cas de PIN erroné (applyFailedAttempt)
  *  - Création du cookie httpOnly 8h en cas de succès
+ *
+ * Routage : la cible de redirection dépend du rôle (adminHomeRoute) — un
+ * arbitre pur atterrit dans son espace dédié /arbitre, pas dans le back-office.
  */
 import { verifyAdminCredentials } from '@/lib/auth/admin-auth'
+import { adminHomeRoute } from '@/lib/auth/home-route'
 import { createAdminSession } from '@/lib/auth/session'
 import { adminLoginSchema } from '@/lib/validation/auth'
 import {
@@ -70,7 +74,8 @@ export async function adminSignIn(
     role: result.account.role,
   })
 
-  return actionSuccess({ redirect: '/admin/dashboard' })
+  // 4. Redirection selon le rôle (arbitre → /arbitre, sinon /admin/dashboard)
+  return actionSuccess({ redirect: adminHomeRoute(result.account.role) })
 }
 
 function computeMinutesUntil(isoTime: string): number {

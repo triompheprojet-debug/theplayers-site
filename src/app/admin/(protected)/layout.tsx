@@ -5,7 +5,13 @@
  *   - AdminRedLine (ligne rouge fine en haut)
  *   - AdminSidebar (navigation desktop, profil, déconnexion)
  *   - AdminTopBar (contexte tournoi actif)
- *   - Garde `requireAdmin()` (redirect /admin/login si pas de session)
+ *   - Garde `requireAdminRole(['super_admin', 'admin'])`
+ *
+ * Le back-office est réservé à super_admin et admin. Un compte purement
+ * arbitre (role=referee) est filtré en amont par le middleware (redirigé vers
+ * /arbitre) ; cette garde sert de défense en profondeur (si le middleware
+ * venait à ne pas matcher une route) et renvoie alors le referee vers son
+ * espace dédié via adminHomeRoute, sans boucle.
  *
  * Le Route Group `(protected)/` n'apparaît pas dans les URLs :
  *   - /admin/dashboard         ← fichier sous (protected)/dashboard/
@@ -19,15 +25,16 @@ import type { ReactNode } from 'react'
 import { AdminRedLine } from '@/components/layout/AdminRedLine'
 import { AdminSidebar } from '@/components/layout/AdminSidebar'
 import { AdminTopBar } from '@/components/layout/AdminTopBar'
-import { requireAdmin } from '@/lib/auth/permissions'
+import { requireAdminRole } from '@/lib/auth/permissions'
 
 export default async function ProtectedAdminLayout({
   children,
 }: {
   children: ReactNode
 }) {
-  // Garde d'auth : si pas de session valide → redirect /admin/login
-  const session = await requireAdmin()
+  // Garde d'auth + rôle : session valide ET rôle back-office (sa/admin).
+  // Sinon redirige (login si absent, /arbitre si referee).
+  const session = await requireAdminRole(['super_admin', 'admin'])
 
   return (
     <div className="min-h-screen bg-bg-primary">
