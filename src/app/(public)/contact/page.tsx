@@ -1,12 +1,13 @@
 import {
   ExternalLink,
-  Mail,
+  Headset,
   MapPin,
   MessageCircle,
   Phone,
   Share2,
   TriangleAlert,
 } from 'lucide-react'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import type { IconType } from 'react-icons'
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa6'
@@ -44,132 +45,218 @@ export default async function ContactPage() {
     ? `https://wa.me/${waPublic.replace(/[^0-9]/g, '')}`
     : null
   const callPhone = phones?.find((p) => !p.is_whatsapp) ?? phones?.[0]
-  const hasJoindre =
-    (phones && phones.length > 0) ||
-    Boolean(waPublic) ||
-    Boolean(location?.city || location?.address)
+  const hasContactMethod = (phones && phones.length > 0) || Boolean(waPublic)
+  const locationLine =
+    [location?.address, location?.city, location?.country]
+      .filter(Boolean)
+      .join(', ') || 'Pointe-Noire, République du Congo'
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-12 md:px-6 md:py-16">
-      <header className="text-center">
-        <h1 className="text-3xl font-black text-text-primary md:text-5xl">
-          Contact
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm text-text-secondary md:text-base">
-          Une question, une inscription ou un partenariat ? Notre équipe vous
-          répond rapidement.
-        </p>
-      </header>
+    <>
+      {/* ═══════════════════════════ HERO ════════════════════════════ */}
+      <section className="relative flex min-h-[55svh] flex-col justify-end overflow-hidden">
+        <Image
+          src="/images/contact/hero.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20"
+          aria-hidden
+        />
+        <div className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-10 md:px-6 md:pb-14">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent-violet">
+            <Headset className="size-4" aria-hidden />
+            Une équipe à ton écoute
+          </p>
+          <h1 className="mt-2 text-4xl font-black uppercase tracking-tight text-text-primary drop-shadow-[0_0_20px_rgba(139,92,246,0.5)] md:text-6xl">
+            On te répond
+          </h1>
+          <p className="mt-4 max-w-xl text-sm text-text-secondary md:text-base">
+            {
+              "Une question, une inscription ou un partenariat ? Le moyen le plus rapide de nous joindre, c'est WhatsApp."
+            }
+          </p>
+          {waHref && (
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-success-neon px-6 font-bold text-background transition-transform active:scale-[0.98]"
+            >
+              <FaWhatsapp className="size-5" aria-hidden />
+              Discuter sur WhatsApp
+            </a>
+          )}
+        </div>
+      </section>
 
-      <div className="mt-8 flex flex-col gap-4">
-        {/* Nous joindre */}
-        {hasJoindre && (
-          <div className="rounded-2xl bg-surface-1 p-6">
-            <div className="flex items-center gap-2">
-              <Mail className="size-5 text-accent-violet" aria-hidden />
-              <h2 className="text-base font-bold text-text-primary">
+      <div className="mx-auto flex max-w-4xl flex-col gap-14 px-4 py-14 md:gap-20 md:px-6 md:py-20">
+        {/* ═══════════════════ NOUS JOINDRE ════════════════════════════ */}
+        <section className="grid items-center gap-8 md:grid-cols-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:order-1">
+            <Image
+              src="/images/contact/phone.webp"
+              alt=""
+              fill
+              sizes="(min-width: 768px) 28rem, 100vw"
+              className="object-cover object-center"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"
+              aria-hidden
+            />
+          </div>
+
+          <div className="flex flex-col gap-5 md:order-2">
+            <header>
+              <p className="text-xs font-semibold uppercase tracking-widest text-accent-violet">
                 Nous joindre
+              </p>
+              <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-text-primary md:text-3xl">
+                Écris ou appelle
               </h2>
-            </div>
+            </header>
 
-            <ul className="mt-4 flex flex-col gap-2">
-              {phones?.map((phone) => {
-                const href = phone.is_whatsapp
-                  ? `https://wa.me/${phone.number.replace(/[^0-9]/g, '')}`
-                  : `tel:${phone.number}`
-                const Icon = phone.is_whatsapp ? MessageCircle : Phone
-                return (
-                  <li key={phone.number}>
+            {hasContactMethod ? (
+              <ul className="flex flex-col gap-2">
+                {phones?.map((phone) => {
+                  const href = phone.is_whatsapp
+                    ? `https://wa.me/${phone.number.replace(/[^0-9]/g, '')}`
+                    : `tel:${phone.number}`
+                  const Icon = phone.is_whatsapp ? MessageCircle : Phone
+                  return (
+                    <li key={phone.number}>
+                      <a
+                        href={href}
+                        target={phone.is_whatsapp ? '_blank' : undefined}
+                        rel={phone.is_whatsapp ? 'noopener noreferrer' : undefined}
+                        className="flex min-h-14 items-center gap-3 rounded-xl bg-surface-1 px-4 text-text-primary transition-colors active:bg-surface-2"
+                      >
+                        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-accent-violet">
+                          <Icon className="size-5" aria-hidden />
+                        </span>
+                        <span className="flex flex-col">
+                          <span className="text-sm font-semibold">{phone.label}</span>
+                          <span className="font-mono text-sm text-text-secondary">
+                            {phone.number}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  )
+                })}
+
+                {waHref && (
+                  <li>
                     <a
-                      href={href}
-                      target={phone.is_whatsapp ? '_blank' : undefined}
-                      rel={phone.is_whatsapp ? 'noopener noreferrer' : undefined}
-                      className="flex min-h-12 items-center gap-3 rounded-md px-2 text-text-primary active:bg-surface-2"
+                      href={waHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-h-14 items-center gap-3 rounded-xl bg-surface-1 px-4 text-text-primary transition-colors active:bg-surface-2"
                     >
-                      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-accent-violet">
-                        <Icon className="size-5" aria-hidden />
+                      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-success-neon">
+                        <FaWhatsapp className="size-5" aria-hidden />
                       </span>
                       <span className="flex flex-col">
-                        <span className="text-sm font-semibold">{phone.label}</span>
+                        <span className="text-sm font-semibold">WhatsApp</span>
                         <span className="font-mono text-sm text-text-secondary">
-                          {phone.number}
+                          {waPublic}
                         </span>
                       </span>
                     </a>
                   </li>
-                )
-              })}
+                )}
+              </ul>
+            ) : (
+              <p className="rounded-2xl bg-surface-1 p-5 text-sm text-text-secondary">
+                {
+                  "Retrouve-nous sur nos réseaux sociaux ci-dessous : c'est là que toute l'actualité des tournois est annoncée."
+                }
+              </p>
+            )}
+          </div>
+        </section>
 
-              {waHref && (
-                <li>
+        {/* ═══════════════════ NOUS TROUVER ════════════════════════════ */}
+        <section className="grid items-center gap-8 md:grid-cols-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:order-2">
+            <Image
+              src="/images/contact/localisation.webp"
+              alt=""
+              fill
+              sizes="(min-width: 768px) 28rem, 100vw"
+              className="object-cover object-center"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"
+              aria-hidden
+            />
+          </div>
+
+          <div className="flex flex-col gap-5 md:order-1">
+            <header>
+              <p className="text-xs font-semibold uppercase tracking-widest text-accent-violet">
+                Nous trouver
+              </p>
+              <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-text-primary md:text-3xl">
+                Sur place, à Pointe-Noire
+              </h2>
+            </header>
+            <div className="flex items-start gap-3 rounded-2xl bg-surface-1 p-5">
+              <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-accent-violet">
+                <MapPin className="size-5" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-text-primary">
+                  {locationLine}
+                </p>
+                {location?.maps_url && (
                   <a
-                    href={waHref}
+                    href={location.maps_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex min-h-12 items-center gap-3 rounded-md px-2 text-text-primary active:bg-surface-2"
+                    className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-accent-violet"
                   >
-                    <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-success-neon">
-                      <FaWhatsapp className="size-5" aria-hidden />
-                    </span>
-                    <span className="flex flex-col">
-                      <span className="text-sm font-semibold">WhatsApp</span>
-                      <span className="font-mono text-sm text-text-secondary">
-                        {waPublic}
-                      </span>
-                    </span>
+                    Ouvrir dans Google Maps
+                    <ExternalLink className="size-4" aria-hidden />
                   </a>
-                </li>
-              )}
-
-              {(location?.city || location?.address) && (
-                <li className="flex items-start gap-3 px-2 py-2">
-                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-accent-violet">
-                    <MapPin className="size-5" aria-hidden />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-text-primary">
-                      {[location.address, location.city, location.country]
-                        .filter(Boolean)
-                        .join(', ')}
-                    </p>
-                    {location.maps_url && (
-                      <a
-                        href={location.maps_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-accent-violet"
-                      >
-                        Ouvrir dans Google Maps
-                        <ExternalLink className="size-4" aria-hidden />
-                      </a>
-                    )}
-                  </div>
-                </li>
-              )}
-            </ul>
+                )}
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {
+                "Le lieu exact de chaque tournoi est communiqué aux joueurs inscrits avant l'événement."
+              }
+            </p>
           </div>
-        )}
+        </section>
 
-        {/* Suivez-nous */}
+        {/* ═══════════════════ SUIVEZ-NOUS ═════════════════════════════ */}
         {socials.length > 0 && (
-          <div className="rounded-2xl bg-surface-1 p-6">
-            <div className="flex items-center gap-2">
+          <section>
+            <header className="mb-5 flex items-center gap-2">
               <Share2 className="size-5 text-accent-violet" aria-hidden />
-              <h2 className="text-base font-bold text-text-primary">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-text-primary md:text-3xl">
                 Suivez-nous
               </h2>
-            </div>
-            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            </header>
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {socials.map(({ key, href, label, icon: Icon }) => (
                 <li key={key}>
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex min-h-12 items-center justify-between gap-2 rounded-md bg-surface-2 px-4 text-sm font-semibold text-text-primary active:scale-[0.98]"
+                    className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-surface-1 px-5 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-2 active:scale-[0.98]"
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <Icon className="size-4 text-accent-violet" aria-hidden />
+                    <span className="inline-flex items-center gap-3">
+                      <span className="inline-flex size-9 items-center justify-center rounded-lg bg-surface-2 text-accent-violet">
+                        <Icon className="size-4" aria-hidden />
+                      </span>
                       {label}
                     </span>
                     <ExternalLink className="size-4 text-text-muted" aria-hidden />
@@ -177,29 +264,29 @@ export default async function ContactPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
 
-        {/* Assistance immédiate */}
+        {/* ═══════════════════ ASSISTANCE IMMÉDIATE ════════════════════ */}
         {(callPhone || waHref) && (
-          <div className="rounded-2xl bg-surface-1 p-6 shadow-glow-violet">
+          <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-accent-violet/15 to-surface-1 p-8 shadow-glow-violet md:p-10">
             <div className="flex items-center gap-2 text-accent-violet">
               <TriangleAlert className="size-4" aria-hidden />
               <span className="text-xs font-semibold uppercase tracking-widest">
                 Assistance immédiate
               </span>
             </div>
-            <h2 className="mt-3 text-lg font-bold text-text-primary">
+            <h2 className="mt-3 text-xl font-black text-text-primary md:text-2xl">
               {"Besoin d'aide le jour du tournoi ?"}
             </h2>
-            <p className="mt-1 text-sm text-text-secondary">
-              {"Support disponible en priorité pour les joueurs en lice lors d'un événement."}
+            <p className="mt-2 max-w-md text-sm text-text-secondary">
+              {"Support prioritaire pour les joueurs en lice pendant un événement."}
             </p>
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               {callPhone && (
                 <a
                   href={`tel:${callPhone.number}`}
-                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-md bg-surface-2 px-4 font-semibold text-text-primary active:scale-[0.98]"
+                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-md bg-surface-2 px-4 font-semibold text-text-primary transition-transform active:scale-[0.98]"
                 >
                   <Phone className="size-4" aria-hidden />
                   Appeler
@@ -210,16 +297,16 @@ export default async function ContactPage() {
                   href={waHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-md bg-surface-2 px-4 font-semibold text-success-neon active:scale-[0.98]"
+                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-md bg-success-neon px-4 font-bold text-background transition-transform active:scale-[0.98]"
                 >
                   <FaWhatsapp className="size-4" aria-hidden />
                   WhatsApp
                 </a>
               )}
             </div>
-          </div>
+          </section>
         )}
       </div>
-    </section>
+    </>
   )
-} 
+}
